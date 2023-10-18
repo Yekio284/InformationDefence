@@ -21,5 +21,8 @@ namespace myCrypto {
         std::vector<ll> generateShamirParameters(); // функция генерации cA, dA, cB, dB, p
         void encodeShamir(const std::string &inputFileName, const std::vector<ll> &params);
         void decodeShamir(const std::string &encodedFileName, const std::vector<ll> &params);
+        std::vector<ll> generateElgamalParameters(); // функция генерации cA, dA, cB, dB, p, g
+        std::vector<ll> encodeElgamal(const std::string &inputFileName, const std::vector<ll> &params);
+        void decodeElgamal(const std::string &encodedFileName, const std::vector<ll> &params, const std::vector<ll> &R_keys);
     }
 }

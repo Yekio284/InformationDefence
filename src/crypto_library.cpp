@@ -232,3 +232,74 @@ void myCrypto::lab_second::decodeShamir(const std::string &encodedFileName, cons
     input.close();
     decoded.close();
 }
+
+std::vector<ll> myCrypto::lab_second::generateElgamalParameters(){ // функция генерации cA, dA, cB, dB, p, g
+	namespace lw1 = myCrypto::lab_first;
+	
+	ll q = lw1::generatePrime(); // q - число Софи Жермен, 
+	ll p = 2 * q + 1; 		     // p - безопасное простое число
+
+	while (!lw1::isPrime(p)) {
+		q = lw1::generatePrime();
+		p = 2 * q + 1;
+	}
+
+	ll g = 2; // первообразный корень по модулю p;
+	for (g; g < p - 1 && lw1::powMod(g, q, p) == 1; g++);
+
+	ll cA = lw1::random(1, p - 1);
+	ll dA = lw1::powMod(g, cA, p);
+	
+	ll cB = lw1::random(1, p - 1);
+	ll dB = lw1::powMod(g, cB, p);
+
+	std::vector<ll>	params(6);
+	params[0] = cA;
+	params[1] = dA;
+	params[2] = cB;
+	params[3] = dB;
+	params[4] = p;
+	params[5] = g;
+
+	return params; // cA, dA, cB, dB, p, g
+} 
+
+std::vector<ll> myCrypto::lab_second::encodeElgamal(const std::string &inputFileName, const std::vector<ll> &params) {
+	namespace lw1 = myCrypto::lab_first;
+
+    std::ifstream input(inputFileName, std::ios::binary); // Открываем файл на чтение в бинарном формате
+    std::ofstream encoded("encoded_" + inputFileName, std::ios::binary); // Открываем файл на запись в бинарном формате
+
+	std::vector<ll> R_keys; // r
+	for (char element; input.read(&element, sizeof(element));) {
+        ll k = lw1::random(0, params[4] - 1);
+		ll r = lw1::powMod(params[5], k, params[4]);
+		ll e = lw1::powMod(params[3], k, params[4]) * static_cast<ll>(element) % params[4];
+        encoded.write(reinterpret_cast<const char*>(&e), sizeof(e));
+		
+		R_keys.push_back(r);
+    }
+
+	input.close();
+	encoded.close();
+
+	return R_keys;
+}
+
+void myCrypto::lab_second::decodeElgamal(const std::string &encodedFileName, const std::vector<ll> &params, const std::vector<ll> &R_keys) {
+	namespace lw1 = myCrypto::lab_first;
+
+    std::ifstream input(encodedFileName, std::ios::binary); // Открываем encoded файл на чтение в бинарном формате
+    std::ofstream decoded("decoded_" + std::string(
+        std::find(encodedFileName.begin(), encodedFileName.end(), '_') + 1, encodedFileName.end()), std::ios::binary); // Открываем файл на запись в бинарном формате
+	
+	int i = 0;
+	for (ll e; input.read(reinterpret_cast<char*>(&e), sizeof(e)); i++) {
+        ll m = lw1::powMod(R_keys[i], params[4] - 1 - params[2], params[4]) * e % params[4];
+        char element = static_cast<char>(m);
+        decoded.write(&element, sizeof(element));
+    }
+
+    input.close();
+    decoded.close();
+}
