@@ -221,7 +221,7 @@ void myCrypto::lab_second::decodeShamir(const std::string &encodedFileName, cons
 
     std::ifstream input(encodedFileName, std::ios::binary); // Открываем encoded файл на чтение в бинарном формате
     std::ofstream decoded("decoded_" + std::string(
-        std::find(encodedFileName.begin(), encodedFileName.end(), '_') + 1, encodedFileName.end())); // Открываем файл на запись
+        std::find(encodedFileName.begin(), encodedFileName.end(), '_') + 1, encodedFileName.end()), std::ios::binary); // Открываем файл на запись
 
     for (ll x3; input.read(reinterpret_cast<char*>(&x3), sizeof(x3));) {
         ll x4 = lw1::powMod(x3, params[3], params[4]);
