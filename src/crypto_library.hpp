@@ -30,5 +30,8 @@ namespace myCrypto {
         std::vector<__int128_t> generateRSAParameters(); // функция генерации cA, dA, nA, cB, dB, nB
         void encodeRSA(const std::string &inputFileName, const std::vector<__int128_t> &params);
         void decodeRSA(const std::string &encodedFileName, const std::vector<__int128_t> &params);
+
+        std::string encodeVernam(const std::string &inputFileName);
+        void decodeVernam(const std::string &encodedFileName, const std::string &key);
     }
 }

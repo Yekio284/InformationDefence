@@ -306,7 +306,7 @@ void myCrypto::lab_second::decodeElgamal(const std::string &encodedFileName, con
     decoded.close();
 }
 
-std::vector<__int128_t> myCrypto::lab_second::generateRSAParameters() { // cA, dA, nA, cB, dB, nB
+std::vector<__int128_t> myCrypto::lab_second::generateRSAParameters() { // cB, dB, nB
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw2 = myCrypto::lab_second;
 
@@ -358,4 +358,37 @@ void myCrypto::lab_second::decodeRSA(const std::string &encodedFileName, const s
 
     input.close();
     decoded.close();
+}
+
+std::string myCrypto::lab_second::encodeVernam(const std::string &inputFileName) {
+	namespace lw1 = myCrypto::lab_first;
+
+    std::ifstream input(inputFileName, std::ios::binary); // Открываем файл на чтение в бинарном формате
+    std::ofstream encoded("encoded_" + inputFileName, std::ios::binary); // Открываем файл на запись в бинарном формате
+
+	std::string key;
+	for (char element; input.read(&element, sizeof(element));) {
+		std::random_device rd;
+		std::mt19937 engine(rd());
+		std::uniform_int_distribution<> distribution(0, 255);
+		key.push_back(distribution(engine));
+		
+		char encodedChar = element ^ key.back();
+
+		encoded.write(&encodedChar, sizeof(encodedChar));
+	}
+
+	return key;
+}
+
+void myCrypto::lab_second::decodeVernam(const std::string &encodedFileName, const std::string &key) {
+	std::ifstream input(encodedFileName, std::ios::binary); // Открываем encoded файл на чтение в бинарном формате
+    std::ofstream decoded("decoded_" + std::string(
+        std::find(encodedFileName.begin(), encodedFileName.end(), '_') + 1, encodedFileName.end()), std::ios::binary); // Открываем файл на запись в бинарном формате
+	
+	ll i = 0;
+	for (char element; input.read(&element, sizeof(element)); i++) {
+		char decodedChar = element ^ key[i];
+		decoded.write(&decodedChar, sizeof(decodedChar));
+	}
 }
