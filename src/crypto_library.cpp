@@ -310,35 +310,22 @@ std::vector<__int128_t> myCrypto::lab_second::generateRSAParameters() { // cA, d
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw2 = myCrypto::lab_second;
 
-	__int128_t pA = lw1::generatePrime();
-	__int128_t qA = lw1::generatePrime();
-	__int128_t nA = pA * qA;
-	__int128_t phi = (pA - 1) * (qA - 1);
-	__int128_t dA = lw1::random(1e7, phi);
-	while (lw2::gcd(dA, phi) != 1)
-		dA = lw1::random(1e7, phi);
-	__int128_t buf_num = lw1::extendedGCD(dA, phi)[1];
-	__int128_t cA = buf_num < 0 ? buf_num + phi : buf_num;
-
 	__int128_t pB = lw1::generatePrime();
 	__int128_t qB = lw1::generatePrime();
 	__int128_t nB = pB * qB;
-	phi = (pB - 1) * (qB - 1);
+	__int128_t phi = (pB - 1) * (qB - 1);
 	__int128_t dB = lw1::random(1e7, phi);
 	while (lw2::gcd(dB, phi) != 1)
 		dB = lw1::random(1e7, phi);
-	buf_num = lw1::extendedGCD(dB, phi)[1];
+	__int128_t buf_num = lw1::extendedGCD(dB, phi)[1];
 	__int128_t cB = buf_num < 0 ? buf_num + phi : buf_num;
 
-	std::vector<__int128_t> params(6);
-	params[0] = cA;
-	params[1] = dA;
-	params[2] = nA;
-	params[3] = cB;
-	params[4] = dB;
-	params[5] = nB;
+	std::vector<__int128_t> params(3);
+	params[0] = cB;
+	params[1] = dB;
+	params[2] = nB;
 
-	return params; // cA, dA, nA, cB, dB, nB
+	return params; // cB, dB, nB
 }
 
 void myCrypto::lab_second::encodeRSA(const std::string &inputFileName, const std::vector<__int128_t> &params) {
@@ -348,7 +335,7 @@ void myCrypto::lab_second::encodeRSA(const std::string &inputFileName, const std
     std::ofstream encoded("encoded_" + inputFileName, std::ios::binary); // Открываем файл на запись в бинарном формате
 
 	for (char element; input.read(&element, sizeof(element));) {
-		__int128_t e = lw1::powMod(static_cast<__int128_t>(element), params[4], params[5]);
+		__int128_t e = lw1::powMod(static_cast<__int128_t>(element), params[1], params[2]);
         encoded.write(reinterpret_cast<const char*>(&e), sizeof(e));
     }
 
@@ -364,7 +351,7 @@ void myCrypto::lab_second::decodeRSA(const std::string &encodedFileName, const s
         std::find(encodedFileName.begin(), encodedFileName.end(), '_') + 1, encodedFileName.end()), std::ios::binary); // Открываем файл на запись в бинарном формате
 	
 	for (__int128_t e; input.read(reinterpret_cast<char*>(&e), sizeof(e));) {
-        __int128_t m = lw1::powMod(e, params[3], params[5]);
+        __int128_t m = lw1::powMod(e, params[0], params[2]);
         char element = static_cast<char>(m);
         decoded.write(&element, sizeof(element));
     }
