@@ -8,8 +8,8 @@
 #include <algorithm>
 #include "crypto_library.hpp"
 
-ll myCrypto::lab_first::powMod(ll a, ll x, ll p) {
-    ll result = 1;
+__int128_t myCrypto::lab_first::powMod(__int128_t a, __int128_t x, __int128_t p) {
+    __int128_t result = 1;
 
 	while (x) {
 		//std::cout << "a = " << a << "\tx = " << x << "\tp = " << p << std::endl;
@@ -283,6 +283,8 @@ std::vector<ll> myCrypto::lab_second::encodeElgamal(const std::string &inputFile
 	input.close();
 	encoded.close();
 
+	R_keys.shrink_to_fit();
+
 	return R_keys;
 }
 
@@ -296,6 +298,73 @@ void myCrypto::lab_second::decodeElgamal(const std::string &encodedFileName, con
 	int i = 0;
 	for (ll e; input.read(reinterpret_cast<char*>(&e), sizeof(e)); i++) {
         ll m = lw1::powMod(R_keys[i], params[4] - 1 - params[2], params[4]) * e % params[4];
+        char element = static_cast<char>(m);
+        decoded.write(&element, sizeof(element));
+    }
+
+    input.close();
+    decoded.close();
+}
+
+std::vector<__int128_t> myCrypto::lab_second::generateRSAParameters() { // cA, dA, nA, cB, dB, nB
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw2 = myCrypto::lab_second;
+
+	__int128_t pA = lw1::generatePrime();
+	__int128_t qA = lw1::generatePrime();
+	__int128_t nA = pA * qA;
+	__int128_t phi = (pA - 1) * (qA - 1);
+	__int128_t dA = lw1::random(1e7, phi);
+	while (lw2::gcd(dA, phi) != 1)
+		dA = lw1::random(1e7, phi);
+	__int128_t buf_num = lw1::extendedGCD(dA, phi)[1];
+	__int128_t cA = buf_num < 0 ? buf_num + phi : buf_num;
+
+	__int128_t pB = lw1::generatePrime();
+	__int128_t qB = lw1::generatePrime();
+	__int128_t nB = pB * qB;
+	phi = (pB - 1) * (qB - 1);
+	__int128_t dB = lw1::random(1e7, phi);
+	while (lw2::gcd(dB, phi) != 1)
+		dB = lw1::random(1e7, phi);
+	buf_num = lw1::extendedGCD(dB, phi)[1];
+	__int128_t cB = buf_num < 0 ? buf_num + phi : buf_num;
+
+	std::vector<__int128_t> params(6);
+	params[0] = cA;
+	params[1] = dA;
+	params[2] = nA;
+	params[3] = cB;
+	params[4] = dB;
+	params[5] = nB;
+
+	return params; // cA, dA, nA, cB, dB, nB
+}
+
+void myCrypto::lab_second::encodeRSA(const std::string &inputFileName, const std::vector<__int128_t> &params) {
+	namespace lw1 = myCrypto::lab_first;
+
+    std::ifstream input(inputFileName, std::ios::binary); // Открываем файл на чтение в бинарном формате
+    std::ofstream encoded("encoded_" + inputFileName, std::ios::binary); // Открываем файл на запись в бинарном формате
+
+	for (char element; input.read(&element, sizeof(element));) {
+		__int128_t e = lw1::powMod(static_cast<__int128_t>(element), params[4], params[5]);
+        encoded.write(reinterpret_cast<const char*>(&e), sizeof(e));
+    }
+
+	input.close();
+	encoded.close();
+}
+
+void myCrypto::lab_second::decodeRSA(const std::string &encodedFileName, const std::vector<__int128_t> &params) {
+	namespace lw1 = myCrypto::lab_first;
+
+    std::ifstream input(encodedFileName, std::ios::binary); // Открываем encoded файл на чтение в бинарном формате
+    std::ofstream decoded("decoded_" + std::string(
+        std::find(encodedFileName.begin(), encodedFileName.end(), '_') + 1, encodedFileName.end()), std::ios::binary); // Открываем файл на запись в бинарном формате
+	
+	for (__int128_t e; input.read(reinterpret_cast<char*>(&e), sizeof(e));) {
+        __int128_t m = lw1::powMod(e, params[3], params[5]);
         char element = static_cast<char>(m);
         decoded.write(&element, sizeof(element));
     }

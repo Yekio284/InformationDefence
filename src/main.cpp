@@ -5,7 +5,8 @@
 #include "crypto_library.hpp"
 
 #define SHAMIR 0
-#define ELGAMAL 1
+#define ELGAMAL 0
+#define RSA 1
 
 #if SHAMIR
 
@@ -47,6 +48,28 @@ int main() {
 
     r_keys = lw2::encodeElgamal(fileName3, params);
     lw2::decodeElgamal("encoded_KURSOVAYA.pdf", params, r_keys);
+
+    return 0;
+}
+
+#elif RSA
+
+int main() {
+    namespace lw2 = myCrypto::lab_second;
+    
+    std::string fileName = "lab.txt";
+    std::string fileName2 = "Ryan_Gosling.jpg";
+    std::string fileName3 = "KURSOVAYA.pdf";
+
+    std::vector<__int128_t> params = lw2::generateRSAParameters();
+    lw2::encodeRSA(fileName, params);
+    lw2::decodeRSA("encoded_lab.txt", params);
+
+    lw2::encodeRSA(fileName2, params);
+    lw2::decodeRSA("encoded_Ryan_Gosling.jpg", params);
+
+    lw2::encodeRSA(fileName3, params);
+    lw2::decodeRSA("encoded_KURSOVAYA.pdf", params);
 
     return 0;
 }
