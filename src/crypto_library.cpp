@@ -180,14 +180,14 @@ std::vector<ll> myCrypto::lab_second::generateShamirParameters() {
 	while (lw2::gcd(cA, p - 1) != 1)
         cA = lw1::random(1e7, 1e9);
 	ll buf_num = lw1::extendedGCD(cA, p - 1)[1];
-	ll dA = buf_num < 0 ? buf_num  + p - 1 : buf_num;
+	ll dA = buf_num < 0 ? buf_num + p - 1 : buf_num;
 	
 	// Bob params
 	ll cB = lw1::random(1e7, 1e9);
 	while (lw2::gcd(cB, p - 1) != 1)
         cB = lw1::random(1e7, 1e9);
 	buf_num = lw1::extendedGCD(cB, p - 1)[1];
-	ll dB = buf_num < 0 ? buf_num  + p - 1 : buf_num;
+	ll dB = buf_num < 0 ? buf_num + p - 1 : buf_num;
 
 	std::vector<ll> params(5);
 	params[0] = cA;
@@ -202,8 +202,8 @@ std::vector<ll> myCrypto::lab_second::generateShamirParameters() {
 void myCrypto::lab_second::encodeShamir(const std::string &inputFileName, const std::vector<ll> &params) {
     namespace lw1 = myCrypto::lab_first;
 
-    std::ifstream input(inputFileName, std::ios::binary);
-    std::ofstream encoded("encoded_" + inputFileName, std::ios::binary);
+    std::ifstream input(inputFileName, std::ios::binary); // Открываем файл на чтение в бинарном формате
+    std::ofstream encoded("encoded_" + inputFileName, std::ios::binary); // Открываем файл на запись в бинарном формате
 	
 	for (char element; input.read(&element, sizeof(element));) {
         ll x1 = lw1::powMod(static_cast<ll>(element), params[0], params[4]);
@@ -219,9 +219,9 @@ void myCrypto::lab_second::encodeShamir(const std::string &inputFileName, const 
 void myCrypto::lab_second::decodeShamir(const std::string &encodedFileName, const std::vector<ll> &params) {
     namespace lw1 = myCrypto::lab_first;
 
-    std::ifstream input(encodedFileName, std::ios::binary);
+    std::ifstream input(encodedFileName, std::ios::binary); // Открываем encoded файл на чтение в бинарном формате
     std::ofstream decoded("decoded_" + std::string(
-        std::find(encodedFileName.begin(), encodedFileName.end(), '_') + 1, encodedFileName.end()), std::ios::binary);
+        std::find(encodedFileName.begin(), encodedFileName.end(), '_') + 1, encodedFileName.end())); // Открываем файл на запись
 
     for (ll x3; input.read(reinterpret_cast<char*>(&x3), sizeof(x3));) {
         ll x4 = lw1::powMod(x3, params[3], params[4]);
