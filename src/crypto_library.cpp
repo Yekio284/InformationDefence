@@ -7,6 +7,7 @@
 #include <utility>
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 #include "crypto_library.hpp"
 #include "../external/PicoSHA2/picosha2.h"
 
@@ -395,20 +396,40 @@ void myCrypto::lab_second::decodeVernam(const std::string &encodedFileName, cons
 	}
 }
 
-void myCrypto::lab_third::signRSA(const std::string &inputFileName, const std::vector<__int128_t> &params) {
-	std::ifstream input(inputFileName, std::ios::binary);
-	std::ofstream signedFile("signed_" + inputFileName, std::ios::binary);
-
-	signedFile << input.rdbuf(); // Делаем копию файла
-
+std::string myCrypto::lab_third::computeHashFromFile(std::ifstream &file) {
 	std::vector<unsigned char> bytes_hash_vec(picosha2::k_digest_size);
-	picosha2::hash256(input, bytes_hash_vec.begin(), bytes_hash_vec.end());
+	picosha2::hash256(file, bytes_hash_vec.begin(), bytes_hash_vec.end());
+
+	return picosha2::bytes_to_hex_string(bytes_hash_vec).substr(0, 8);
+}
+
+ll myCrypto::lab_third::hexToDecimal(const std::string &hex_str) {
+	std::stringstream ss;
+	ss << std::hex << hex_str;
+	
+	ll decimal_result;
+	ss >> decimal_result;
+
+	return decimal_result;
+}
+
+void myCrypto::lab_third::signRSA(const std::string &inputFileName, const std::vector<__int128_t> &params) {
+	namespace lw3 = myCrypto::lab_third;
+
+	std::ifstream input(inputFileName, std::ios::binary); // открываем файл на чтение в бинарном формате
+	
+	std::string hash_str = lw3::computeHashFromFile(input); // Вычисляем hash файла и записываем его в строку в виде 16-ричного числа. (алгоритм PicoSHA2)
+	ll hash_ll = lw3::hexToDecimal(hash_str);
+	
+	std::cout << hash_str << std::endl;
+	std::cout << hash_ll << std::endl;
+
+	input.close(); // Переоткроем файл в виду того, что "каретка" input'а сдвинулась в конец при работе с PicoSHA2
+	input.open(inputFileName, std::ios::binary);
+	
+	std::ofstream signedFile("signed_" + inputFileName, std::ios::binary); // открываем файл на запись в бинарном формате
+	signedFile << input.rdbuf(); // Делаем копию файла
 	input.close();
 
-	std::cout << picosha2::bytes_to_hex_string(bytes_hash_vec) << std::endl;
-
-	//for (const unsigned char &element : hash_vec)
-	//	std::cout << static_cast<ll>(element) << std::endl;
-	
-	std::cout << std::endl;
+	// To be continued...
 }
