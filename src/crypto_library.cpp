@@ -6,7 +6,9 @@
 #include <string>
 #include <utility>
 #include <algorithm>
+#include <fstream>
 #include "crypto_library.hpp"
+#include "../external/PicoSHA2/picosha2.h"
 
 __int128_t myCrypto::lab_first::powMod(__int128_t a, __int128_t x, __int128_t p) {
     __int128_t result = 1;
@@ -391,4 +393,22 @@ void myCrypto::lab_second::decodeVernam(const std::string &encodedFileName, cons
 		char decodedChar = element ^ key[i];
 		decoded.write(&decodedChar, sizeof(decodedChar));
 	}
+}
+
+void myCrypto::lab_third::signRSA(const std::string &inputFileName, const std::vector<__int128_t> &params) {
+	std::ifstream input(inputFileName, std::ios::binary);
+	std::ofstream signedFile("signed_" + inputFileName, std::ios::binary);
+
+	signedFile << input.rdbuf(); // Делаем копию файла
+
+	std::vector<unsigned char> bytes_hash_vec(picosha2::k_digest_size);
+	picosha2::hash256(input, bytes_hash_vec.begin(), bytes_hash_vec.end());
+	input.close();
+
+	std::cout << picosha2::bytes_to_hex_string(bytes_hash_vec) << std::endl;
+
+	//for (const unsigned char &element : hash_vec)
+	//	std::cout << static_cast<ll>(element) << std::endl;
+	
+	std::cout << std::endl;
 }

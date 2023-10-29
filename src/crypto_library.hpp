@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <fstream>
 
 typedef long long ll;
 
@@ -35,6 +34,6 @@ namespace myCrypto {
         void decodeVernam(const std::string &encodedFileName, const std::string &key);
     }
     namespace lab_third {
-        
+        void signRSA(const std::string &inputFileName, const std::vector<__int128_t> &params);
     }
 }
