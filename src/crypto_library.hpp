@@ -34,4 +34,7 @@ namespace myCrypto {
         std::string encodeVernam(const std::string &inputFileName);
         void decodeVernam(const std::string &encodedFileName, const std::string &key);
     }
+    namespace lab_third {
+        
+    }
 }
