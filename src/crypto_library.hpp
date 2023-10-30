@@ -8,7 +8,7 @@ typedef long long ll;
 
 namespace myCrypto {
     namespace lab_first { 
-        __int128_t powMod(__int128_t a, __int128_t x, __int128_t p); // a^x mod p
+        ll powMod(__int128_t a, __int128_t x, __int128_t p); // a^x mod p
         ll binPow(ll a, ll x); // a^x
         std::vector<ll> extendedGCD(ll a, ll b); // Обобщённый алгоритм Евклида
         bool isPrime(ll n);
@@ -28,9 +28,9 @@ namespace myCrypto {
         std::vector<ll> encodeElgamal(const std::string &inputFileName, const std::vector<ll> &params);
         void decodeElgamal(const std::string &encodedFileName, const std::vector<ll> &params, const std::vector<ll> &R_keys);
 
-        std::vector<__int128_t> generateRSAParameters(); // функция генерации cA, dA, nA, cB, dB, nB
-        void encodeRSA(const std::string &inputFileName, const std::vector<__int128_t> &params);
-        void decodeRSA(const std::string &encodedFileName, const std::vector<__int128_t> &params);
+        std::vector<ll> generateRSAParameters(); // функция генерации cB, dB, nB
+        void encodeRSA(const std::string &inputFileName, const std::vector<ll> &params);
+        void decodeRSA(const std::string &encodedFileName, const std::vector<ll> &params);
 
         std::string encodeVernam(const std::string &inputFileName);
         void decodeVernam(const std::string &encodedFileName, const std::string &key);
@@ -39,6 +39,7 @@ namespace myCrypto {
         std::string computeHashFromFile(std::ifstream &file);
         ll hexToDecimal(const std::string &hex_str); // str -> ll
         
-        void signRSA(const std::string &inputFileName, const std::vector<__int128_t> &params);
+        ll signRSA(const std::string &inputFileName, const std::vector<ll> &params);
+        bool checkSignRSA(const std::string &fileNameToCheck, const std::vector<ll> &params, const ll &s);
     }
 }
