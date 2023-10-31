@@ -38,8 +38,12 @@ namespace myCrypto {
     namespace lab_third {
         std::string computeHashFromFile(std::ifstream &file);
         ll hexToDecimal(const std::string &hex_str); // str -> ll
-        
+        ll generateBigPrime();
+
         ll signRSA(const std::string &inputFileName, const std::vector<ll> &params);
         bool checkSignRSA(const std::string &fileNameToCheck, const std::vector<ll> &params, const ll &s);
+
+        std::vector<ll> generateSignElgamalParameters(); // g, p, x, y
+        void signElgamal(const std::string &inputFileName, const std::vector<ll> &params);
     }
 }

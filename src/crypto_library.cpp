@@ -97,9 +97,8 @@ ll myCrypto::lab_first::random(ll a, ll b) {
 
 ll myCrypto::lab_first::generatePrime() {
 	ll n = 1;
-	while (!isPrime(n))
-		n = myCrypto::lab_first::random(myCrypto::lab_first::binPow(10, 7), 
-										myCrypto::lab_first::binPow(10, 9));
+	while (!myCrypto::lab_first::isPrime(n))
+		n = myCrypto::lab_first::random(1e7, 1e9);
 	
 	return n;
 }
@@ -414,6 +413,14 @@ ll myCrypto::lab_third::hexToDecimal(const std::string &hex_str) {
 	return decimal_result;
 }
 
+ll myCrypto::lab_third::generateBigPrime() {
+	ll n = 1;
+	while (!myCrypto::lab_first::isPrime(n))
+		n = myCrypto::lab_first::random(4294967296, 7e9); // [0xffffffff + 1; 7e9]
+	
+	return n;
+}
+
 ll myCrypto::lab_third::signRSA(const std::string &inputFileName, const std::vector<ll> &params) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw3 = myCrypto::lab_third;
@@ -424,7 +431,7 @@ ll myCrypto::lab_third::signRSA(const std::string &inputFileName, const std::vec
 	ll hash_ll = lw3::hexToDecimal(hash_str); // Переводим hex в decimal
 	
 	//std::cout << "hash_str = " << hash_str << std::endl;
-	//std::cout << "hash_ll = " << hash_ll;
+	//std::cout << "hash_ll = " << hash_ll << std::endl;
 
 	input.seekg(0); // Переместим "каретку" на начало файла в виду того, что она сдвинулась в конец при работе с PicoSHA2
 	
@@ -472,4 +479,35 @@ bool myCrypto::lab_third::checkSignRSA(const std::string &fileNameToCheck, const
 	//std::cout << "w = " << w << "\th(m) = " << hash_ll << std::endl;
 
 	return w == hash_ll;
+}
+
+std::vector<ll> myCrypto::lab_third::generateSignElgamalParameters() {
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw3 = myCrypto::lab_third;
+	
+	ll q = lw3::generateBigPrime(); // q - число Софи Жермен, 
+	ll p = 2 * q + 1; 		     	// p - безопасное простое число
+
+	while (!lw1::isPrime(p)) {
+		q = lw3::generateBigPrime();
+		p = 2 * q + 1;
+	}
+
+	ll g = 2; // первообразный корень по модулю p;
+	for (g; g < p - 1 && lw1::powMod(g, q, p) == 1; g++);
+
+	ll x = lw1::random(2, p - 2);
+	ll y = lw1::powMod(g, x, p);
+
+	std::vector<ll> params(4);
+	params[0] = g;
+	params[1] = p;
+	params[2] = x;
+	params[3] = y;
+
+	return params; // g, p, x, y
+}
+
+void myCrypto::lab_third::signElgamal(const std::string &inputFileName, const std::vector<ll> &params) {
+	//
 }
