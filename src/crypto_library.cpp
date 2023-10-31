@@ -416,7 +416,7 @@ ll myCrypto::lab_third::hexToDecimal(const std::string &hex_str) {
 ll myCrypto::lab_third::generateBigPrime() {
 	ll n = 1;
 	while (!myCrypto::lab_first::isPrime(n))
-		n = myCrypto::lab_first::random(2'147'483'648, 3e9); // [(0xFFFFFFFF + 1) div 2; 7e9]
+		n = myCrypto::lab_first::random(2'147'483'648, 3e9); // [(0xFFFFFFFF + 1) div 2; 3e9]
 	
 	return n;
 }
