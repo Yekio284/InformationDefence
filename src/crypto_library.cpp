@@ -416,7 +416,7 @@ ll myCrypto::lab_third::hexToDecimal(const std::string &hex_str) {
 ll myCrypto::lab_third::generateBigPrime() {
 	ll n = 1;
 	while (!myCrypto::lab_first::isPrime(n))
-		n = myCrypto::lab_first::random(4294967296, 7e9); // [0xffffffff + 1; 7e9]
+		n = myCrypto::lab_first::random(2'147'483'648, 3e9); // [0xFFFFFFFF + 1; 7e9]
 	
 	return n;
 }
@@ -509,5 +509,55 @@ std::vector<ll> myCrypto::lab_third::generateSignElgamalParameters() {
 }
 
 void myCrypto::lab_third::signElgamal(const std::string &inputFileName, const std::vector<ll> &params) {
-	//
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw2 = myCrypto::lab_second;
+	namespace lw3 = myCrypto::lab_third;
+	
+	std::ifstream input(inputFileName, std::ios::binary); // открываем файл на чтение в бинарном формате
+	
+	std::string hash_str = lw3::computeHashFromFile(input); // Вычисляем hash файла и записываем его в строку в виде 16-ричного числа. (алгоритм PicoSHA2)
+	ll hash_ll = lw3::hexToDecimal(hash_str); // Переводим hex в decimal
+
+	std::cout << "hash_str = " << hash_str << std::endl;
+	std::cout << "hash_ll = " << hash_ll << std::endl;
+
+	// Нет проверки на 1 < h < p т.к. максимальное значение h = 0xFFFFFFFF. Диапазон генерации p начинается с 0xFFFFFFFF + 1
+	
+	input.seekg(0); // Переместим "каретку" на начало файла в виду того, что она сдвинулась в конец при работе с PicoSHA2
+	
+	std::ofstream signedFile("signed_" + inputFileName, std::ios::binary); // открываем файл на запись в бинарном формате
+	signedFile << input.rdbuf(); // Делаем копию файла
+	signedFile.seekp(signedFile.tellp()); // Смещаем позицию записи в конец
+	input.close(); // Закрываем input
+
+	ll k = lw1::random(2, params[1] - 2);
+	while (lw2::gcd(k, params[1] - 1) != 1)
+		k = lw1::random(2, params[1] - 2);
+
+	ll r = lw1::powMod(params[0], k, params[1]);
+
+	std::cout << "k = " << k << std::endl;
+	std::cout << "r = " << r << std::endl;
+	
+	ll buf1 = hash_ll - params[2] * r;
+	ll buf2 = params[1] - 1;
+
+	ll u = (hash_ll - params[2] * r) % (params[1] - 1);
+	ll k_inversed = lw1::extendedGCD(k, params[1] - 1)[1];
+	if (k_inversed < 0)
+		k_inversed + params[1] - 1;
+	
+	buf1 = k_inversed * u;
+	buf2 = params[1] - 1;
+	ll s = (k_inversed * u) % (params[1] - 1);
+	
+	std::cout << "u = " << u << std::endl;
+	std::cout << "k_inversed = " << k_inversed << std::endl;
+	std::cout << "s = " << s << std::endl;
+
+	// Подписываем документ
+	signedFile.write(reinterpret_cast<const char*>(&r), sizeof(r));
+	signedFile.write(reinterpret_cast<const char*>(&s), sizeof(s)); 
+
+	// PROBLEM: Есть проблема с выходом за long long. Исправлю завтра или позже
 }
