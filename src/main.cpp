@@ -28,7 +28,8 @@ int main() {
     });
     delete[] syms;
     
-    lw3::signElgamal(filename, params);
+    std::pair<ll, ll> RSkeys = lw3::signElgamal(filename, params);
+    
     
     return 0;
 }

@@ -400,7 +400,7 @@ std::string myCrypto::lab_third::computeHashFromFile(std::ifstream &file) {
 	std::vector<unsigned char> bytes_hash_vec(picosha2::k_digest_size);
 	picosha2::hash256(file, bytes_hash_vec.begin(), bytes_hash_vec.end());
 
-	return picosha2::bytes_to_hex_string(bytes_hash_vec).substr(0, 8);
+	return picosha2::bytes_to_hex_string(bytes_hash_vec).substr(0, 7);
 }
 
 ll myCrypto::lab_third::hexToDecimal(const std::string &hex_str) {
@@ -416,7 +416,7 @@ ll myCrypto::lab_third::hexToDecimal(const std::string &hex_str) {
 ll myCrypto::lab_third::generateBigPrime() {
 	ll n = 1;
 	while (!myCrypto::lab_first::isPrime(n))
-		n = myCrypto::lab_first::random(2'147'483'648, 3e9); // [(0xFFFFFFFF + 1) div 2; 3e9]
+		n = myCrypto::lab_first::random(3e8, 1e9);
 	
 	return n;
 }
@@ -508,7 +508,7 @@ std::vector<ll> myCrypto::lab_third::generateSignElgamalParameters() {
 	return params; // g, p, x, y
 }
 
-void myCrypto::lab_third::signElgamal(const std::string &inputFileName, const std::vector<ll> &params) {
+std::pair<ll, ll> myCrypto::lab_third::signElgamal(const std::string &inputFileName, const std::vector<ll> &params) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw2 = myCrypto::lab_second;
 	namespace lw3 = myCrypto::lab_third;
@@ -521,7 +521,7 @@ void myCrypto::lab_third::signElgamal(const std::string &inputFileName, const st
 	std::cout << "hash_str = " << hash_str << std::endl;
 	std::cout << "hash_ll = " << hash_ll << std::endl;
 
-	// Нет проверки на 1 < h < p т.к. максимальное значение h = 0xFFFFFFFF. Диапазон генерации p начинается с 0xFFFFFFFF + 1
+	// Нет проверки на 1 < h < p т.к. максимальное значение h = 268'435'455. Диапазон генерации p начинается с 3e8
 	
 	input.seekg(0); // Переместим "каретку" на начало файла в виду того, что она сдвинулась в конец при работе с PicoSHA2
 	
@@ -542,14 +542,15 @@ void myCrypto::lab_third::signElgamal(const std::string &inputFileName, const st
 	ll buf1 = hash_ll - params[2] * r;
 	ll buf2 = params[1] - 1;
 
-	ll u = (hash_ll - params[2] * r) % (params[1] - 1);
+	//ll u = buf1 % buf2;
+	ll u = (buf1 % buf2 + buf2) % buf2;
 	ll k_inversed = lw1::extendedGCD(k, params[1] - 1)[1];
 	if (k_inversed < 0)
-		k_inversed + params[1] - 1;
+		k_inversed = k_inversed + params[1] - 1;
 	
 	buf1 = k_inversed * u;
 	buf2 = params[1] - 1;
-	ll s = (k_inversed * u) % (params[1] - 1);
+	ll s = buf1 % buf2;
 	
 	std::cout << "u = " << u << std::endl;
 	std::cout << "k_inversed = " << k_inversed << std::endl;
@@ -559,5 +560,9 @@ void myCrypto::lab_third::signElgamal(const std::string &inputFileName, const st
 	signedFile.write(reinterpret_cast<const char*>(&r), sizeof(r));
 	signedFile.write(reinterpret_cast<const char*>(&s), sizeof(s)); 
 
-	// PROBLEM: Есть проблема с выходом за long long. Исправлю завтра или позже
+	return std::make_pair(r, s);
+}
+
+bool myCrypto::lab_third::checkSignElgamal(const std::string &fileNameToCheck, const std::vector<ll> &params, const std::pair<ll, ll> &RSkeys) {
+	
 }

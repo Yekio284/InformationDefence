@@ -44,6 +44,7 @@ namespace myCrypto {
         bool checkSignRSA(const std::string &fileNameToCheck, const std::vector<ll> &params, const ll &s);
 
         std::vector<ll> generateSignElgamalParameters(); // g, p, x, y
-        void signElgamal(const std::string &inputFileName, const std::vector<ll> &params);
+        std::pair<ll, ll> signElgamal(const std::string &inputFileName, const std::vector<ll> &params);
+        bool checkSignElgamal(const std::string &fileNameToCheck, const std::vector<ll> &params, const std::pair<ll, ll> &RSkeys);
     }
 }
