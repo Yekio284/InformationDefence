@@ -595,3 +595,5 @@ bool myCrypto::lab_third::checkSignElgamal(const std::string &fileNameToCheck, c
 
 	return buf1 == buf2;
 }
+
+// std::vector<ll> myCrypto::lab_third::generateSignGOSTParameters() {}

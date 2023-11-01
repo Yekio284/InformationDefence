@@ -46,5 +46,7 @@ namespace myCrypto {
         std::vector<ll> generateSignElgamalParameters(); // g, p, x, y
         std::pair<ll, ll> signElgamal(const std::string &inputFileName, const std::vector<ll> &params);
         bool checkSignElgamal(const std::string &fileNameToCheck, const std::vector<ll> &params, const std::pair<ll, ll> &RSkeys);
+
+        std::vector<ll> generateSignGOSTParameters();
     }
 }
