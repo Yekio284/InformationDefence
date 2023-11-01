@@ -518,8 +518,8 @@ std::pair<ll, ll> myCrypto::lab_third::signElgamal(const std::string &inputFileN
 	std::string hash_str = lw3::computeHashFromFile(input); // Вычисляем hash файла и записываем его в строку в виде 16-ричного числа. (алгоритм PicoSHA2)
 	ll hash_ll = lw3::hexToDecimal(hash_str); // Переводим hex в decimal
 
-	std::cout << "hash_str = " << hash_str << std::endl;
-	std::cout << "hash_ll = " << hash_ll << std::endl;
+	//std::cout << "hash_str = " << hash_str << std::endl;
+	//std::cout << "hash_ll = " << hash_ll << std::endl;
 
 	// Нет проверки на 1 < h < p т.к. максимальное значение h = 268'435'455. Диапазон генерации p начинается с 3e8
 	
@@ -536,13 +536,11 @@ std::pair<ll, ll> myCrypto::lab_third::signElgamal(const std::string &inputFileN
 
 	ll r = lw1::powMod(params[0], k, params[1]);
 
-	std::cout << "k = " << k << std::endl;
-	std::cout << "r = " << r << std::endl;
+	//std::cout << "k = " << k << std::endl;
+	//std::cout << "r = " << r << std::endl;
 	
 	ll buf1 = hash_ll - params[2] * r;
 	ll buf2 = params[1] - 1;
-
-	//ll u = buf1 % buf2;
 	ll u = (buf1 % buf2 + buf2) % buf2;
 	ll k_inversed = lw1::extendedGCD(k, params[1] - 1)[1];
 	if (k_inversed < 0)
@@ -552,9 +550,9 @@ std::pair<ll, ll> myCrypto::lab_third::signElgamal(const std::string &inputFileN
 	buf2 = params[1] - 1;
 	ll s = buf1 % buf2;
 	
-	std::cout << "u = " << u << std::endl;
-	std::cout << "k_inversed = " << k_inversed << std::endl;
-	std::cout << "s = " << s << std::endl;
+	//std::cout << "u = " << u << std::endl;
+	//std::cout << "k_inversed = " << k_inversed << std::endl;
+	//std::cout << "s = " << s << std::endl;
 
 	// Подписываем документ
 	signedFile.write(reinterpret_cast<const char*>(&r), sizeof(r));
@@ -564,5 +562,36 @@ std::pair<ll, ll> myCrypto::lab_third::signElgamal(const std::string &inputFileN
 }
 
 bool myCrypto::lab_third::checkSignElgamal(const std::string &fileNameToCheck, const std::vector<ll> &params, const std::pair<ll, ll> &RSkeys) {
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw3 = myCrypto::lab_third;
+	namespace fs = std::filesystem;
 	
+	std::ifstream file(fileNameToCheck, std::ios::binary);
+	const std::string copy_name = "copy_" + fileNameToCheck;
+	std::ofstream copyFile(copy_name, std::ios::binary);
+
+	copyFile << file.rdbuf(); // Делаем копию файла "signed_<...>" или любого другого заданного в fileNameToCheck
+	file.close();
+	copyFile.close();
+
+	const auto path_to_file = fs::path(copy_name);
+	fs::resize_file(path_to_file, fs::file_size(path_to_file) - 2 * sizeof(ll)); // Переопредялем размер файла "copy_<..>", т.е., 
+																			 //	грубо говоря, убираем предполагаемую цифровую подпись
+
+	file.open(copy_name, std::ios::binary); // Открываем файл "copy_<...>"
+	std::string hash_str = lw3::computeHashFromFile(file);
+	ll hash_ll = lw3::hexToDecimal(hash_str);
+	
+	//std::cout << "Check_hash_str = " << hash_str << std::endl;
+	//std::cout << "Check_hash_ll = " << hash_ll << std::endl;
+	
+	file.close(); // Закрываем файл "copy_<...>"
+	std::remove(copy_name.c_str()); // Удаляем файл "copy_<...>"
+
+	ll buf1 = (lw1::powMod(params[3], RSkeys.first, params[1]) * lw1::powMod(RSkeys.first, RSkeys.second, params[1])) % params[1];
+	ll buf2 = lw1::powMod(params[0], hash_ll, params[1]);
+
+	//std::cout << "buf1 = " << buf1 << "\tbuf2 = " << buf2 << std::endl;
+
+	return buf1 == buf2;
 }
