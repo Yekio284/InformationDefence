@@ -18,8 +18,8 @@ int main() {
     //std::cout << filename << ": " << std::boolalpha << lw3::checkSignRSA(filename, params, s) << std::endl; // попробуем проверить исходный файл на "подписанность"
     //std::cout << sign_filename << ": " << lw3::checkSignRSA(sign_filename, params, s) << std::endl; // попробуем проверить подписанный файл на "подписанность"
 
-    std::cout << "ELGAMAL SIGN:" << std::endl;
-    params = lw3::generateSignElgamalParameters();
+    //std::cout << "ELGAMAL SIGN:" << std::endl;
+    //params = lw3::generateSignElgamalParameters();
     
     //char *syms = new char[4]{'g', 'p', 'x', 'y'};
     //std::for_each(params.begin(), params.end(), [syms](long long n) mutable { 
@@ -28,9 +28,23 @@ int main() {
     //});
     //delete[] syms;
     
-    std::pair<ll, ll> RSkeys = lw3::signElgamal(filename, params);
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignElgamal(filename, params, RSkeys) << std::endl; // попробуем проверить исходный файл на "подписанность"
-    std::cout << sign_filename << ": " << lw3::checkSignElgamal(sign_filename, params, RSkeys) << std::endl; // попробуем проверить подписанный файл на "подписанность"
+    //std::pair<ll, ll> RSkeys = lw3::signElgamal(filename, params);
+    //std::cout << filename << ": " << std::boolalpha << lw3::checkSignElgamal(filename, params, RSkeys) << std::endl; // попробуем проверить исходный файл на "подписанность"
+    //std::cout << sign_filename << ": " << lw3::checkSignElgamal(sign_filename, params, RSkeys) << std::endl; // попробуем проверить подписанный файл на "подписанность"
     
+
+    std::cout << "GOST SIGN:" << std::endl;
+    params = lw3::generateSignGOSTParameters();
+    //char *syms = new char[5]{'p', 'q', 'a', 'x', 'y'};
+    //std::for_each(params.begin(), params.end(), [syms](long long n) mutable { 
+    //    std::cout << *syms << " = " << n << std::endl;
+    //    syms++;
+    //});
+    //delete[] syms;
+    
+    std::pair<ll, ll> RSkeys = lw3::signGOST(filename, params);
+    std::cout << filename << ": " << std::boolalpha << lw3::checkSignGOST(filename, params, RSkeys) << std::endl; // попробуем проверить исходный файл на "подписанность"
+    std::cout << sign_filename << ": " << lw3::checkSignGOST(sign_filename, params, RSkeys) << std::endl; // попробуем проверить подписанный файл на "подписанность"
+
     return 0;
 }

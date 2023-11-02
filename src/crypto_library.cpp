@@ -12,6 +12,11 @@
 #include "crypto_library.hpp"
 #include "../external/PicoSHA2/picosha2.h"
 
+inline std::ostream &operator<<(std::ostream &out, __int128_t val) { // https://stackoverflow.com/questions/66053030/overload-of-stdostream-for-int128-t-ambiguous-when-called-from-a-namespace
+    //Obviously not the real implementation, just here as an example
+    return out << static_cast<uint64_t>(val);
+}
+
 ll myCrypto::lab_first::powMod(__int128_t a, __int128_t x, __int128_t p) {
     ll result = 1;
 
@@ -499,13 +504,7 @@ std::vector<ll> myCrypto::lab_third::generateSignElgamalParameters() {
 	ll x = lw1::random(2, p - 2);
 	ll y = lw1::powMod(g, x, p);
 
-	std::vector<ll> params(4);
-	params[0] = g;
-	params[1] = p;
-	params[2] = x;
-	params[3] = y;
-
-	return params; // g, p, x, y
+	return std::vector<ll>({g, p, x, y});
 }
 
 std::pair<ll, ll> myCrypto::lab_third::signElgamal(const std::string &inputFileName, const std::vector<ll> &params) {
@@ -596,4 +595,106 @@ bool myCrypto::lab_third::checkSignElgamal(const std::string &fileNameToCheck, c
 	return buf1 == buf2;
 }
 
-// std::vector<ll> myCrypto::lab_third::generateSignGOSTParameters() {}
+std::vector<ll> myCrypto::lab_third::generateSignGOSTParameters() {
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw3 = myCrypto::lab_third;
+
+	ll b, q, p;
+	do {
+		b = lw1::random(2, 1e7);
+		q = lw3::generateBigPrime();
+		p = b * q + 1;
+	} while (!lw1::isPrime(p));
+
+	ll a;
+	do {
+		ll g = lw1::random(2, 1e8);
+		a = lw1::powMod(g, (p - 1) / q, p);
+	} while (lw1::powMod(a, q, p) != 1);
+
+	ll x = lw1::random(1, q - 1);
+	ll y = lw1::powMod(a, x, p);
+	
+	//std::cout << "b = " << b << "\tq = " << q << "\tp = " << p << "\ta = " << a << "\tx = " << x << "\ty = " << y << std::endl;
+
+	return std::vector<ll>({p, q, a, x, y});
+}
+
+std::pair<ll, ll> myCrypto::lab_third::signGOST(const std::string &inputFileName, const std::vector<ll> &params) {
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw3 = myCrypto::lab_third;
+	
+	std::ifstream input(inputFileName, std::ios::binary);
+
+	std::string hash_str = lw3::computeHashFromFile(input);
+	ll hash_ll = lw3::hexToDecimal(hash_str);
+
+	input.seekg(0); // Переместим "каретку" на начало файла в виду того, что она сдвинулась в конец при работе с PicoSHA2
+	
+	std::ofstream signedFile("signed_" + inputFileName, std::ios::binary); // открываем файл на запись в бинарном формате
+	signedFile << input.rdbuf(); // Делаем копию файла
+	signedFile.seekp(signedFile.tellp()); // Смещаем позицию записи в конец
+	input.close(); // Закрываем input
+
+	//std::cout << "hash_str = " << hash_str << std::endl;
+	//std::cout << "hash_ll = " << hash_ll << std::endl;
+
+	ll k, r, s;
+	do {
+		k = lw1::random(1, params[1]);
+		r = (lw1::powMod(params[2], k, params[0])) % params[1];
+		s = (k * hash_ll + params[3] * r) % params[1];
+	} while (r == 0 || s == 0);
+
+	//std::cout << "k = " << k << "\tr = " << r << "\ts = " << s << std::endl;
+
+	signedFile.write(reinterpret_cast<const char*>(&r), sizeof(r));
+	signedFile.write(reinterpret_cast<const char*>(&s), sizeof(s));
+
+	return std::make_pair(r, s);
+}
+
+bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, const std::vector<ll> &params, const std::pair<ll, ll> &RSkeys) {
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw3 = myCrypto::lab_third;
+	namespace fs = std::filesystem;
+	
+	std::ifstream file(fileNameToCheck, std::ios::binary);
+	const std::string copy_name = "copy_" + fileNameToCheck;
+	std::ofstream copyFile(copy_name, std::ios::binary);
+
+	copyFile << file.rdbuf(); // Делаем копию файла "signed_<...>" или любого другого заданного в fileNameToCheck
+	file.close();
+	copyFile.close();
+
+	const auto path_to_file = fs::path(copy_name);
+	fs::resize_file(path_to_file, fs::file_size(path_to_file) - 2 * sizeof(ll)); // Переопредялем размер файла "copy_<..>", т.е., 
+																			     //	грубо говоря, убираем предполагаемую цифровую подпись
+
+	file.open(copy_name, std::ios::binary); // Открываем файл "copy_<...>"
+	std::string hash_str = lw3::computeHashFromFile(file);
+	ll hash_ll = lw3::hexToDecimal(hash_str);
+	
+	file.close(); // Закрываем файл "copy_<...>"
+	std::remove(copy_name.c_str()); // Удаляем файл "copy_<...>"
+
+	if (RSkeys.first >= params[1] || RSkeys.second >= params[1])
+		return false;
+	
+	ll h_inverted = lw1::extendedGCD(hash_ll, params[1])[1];
+	if (h_inverted < 0)
+		h_inverted = h_inverted + params[1];
+	
+	ll u1 = (RSkeys.second * h_inverted) % params[1];
+	ll u2 = ((RSkeys.first * -1) * h_inverted) % params[1];
+	u2 = u2 < 0 ? u2 + params[1] : u2;
+	
+	__int128_t v = (static_cast<__int128_t>((lw1::powMod(params[2], u1, params[0])) * 
+		static_cast<__int128_t>(lw1::powMod(params[4], u2, params[0]))) % params[0]) % params[1];
+
+	//std::cout << "Check_hash_str = " << hash_str << "\tCheck_hash_ll = " << hash_ll << "\th_inv = " << 
+	//	h_inverted << "\nu1 = " << u1 << "\tu2 = " << u2 << std::endl;
+	//std::cout << "v = " << v << std::endl;
+	
+	return v == RSkeys.first;
+}
