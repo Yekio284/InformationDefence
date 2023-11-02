@@ -689,7 +689,7 @@ bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, cons
 	ll u2 = ((RSkeys.first * -1) * h_inverted) % params[1];
 	u2 = u2 < 0 ? u2 + params[1] : u2;
 	
-	__int128_t v = (static_cast<__int128_t>((lw1::powMod(params[2], u1, params[0])) * 
+	ll v = (static_cast<__int128_t>((lw1::powMod(params[2], u1, params[0])) * 
 		static_cast<__int128_t>(lw1::powMod(params[4], u2, params[0]))) % params[0]) % params[1];
 
 	//std::cout << "Check_hash_str = " << hash_str << "\tCheck_hash_ll = " << hash_ll << "\th_inv = " << 
