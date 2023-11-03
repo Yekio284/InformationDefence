@@ -328,12 +328,7 @@ std::vector<ll> myCrypto::lab_second::generateRSAParameters() { // cB, dB, nB
 	ll buf_num = lw1::extendedGCD(dB, phi)[1];
 	ll cB = buf_num < 0 ? buf_num + phi : buf_num;
 
-	std::vector<ll> params(3);
-	params[0] = cB;
-	params[1] = dB;
-	params[2] = nB;
-
-	return params; // cB, dB, nB
+	return std::vector<ll>({cB, dB, nB}); // cB, dB, nB
 }
 
 void myCrypto::lab_second::encodeRSA(const std::string &inputFileName, const std::vector<ll> &params) {
