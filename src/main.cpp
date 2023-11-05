@@ -8,7 +8,7 @@
 #define ELGAMAL 0
 #define GOST 0
 #define ALL 1
-#define DEBUGPARAMS 1
+#define DEBUGPARAMS 0
 
 #if RSA
 
@@ -19,7 +19,7 @@ int main() {
     const std::vector<ll> params = lw2::generateRSAParameters();
     const std::string filename = "Ryan_Gosling.jpg";
     const std::string sign_filename = "signed_" + filename;
-    const ll s = lw3::signRSA(filename, params);
+    lw3::signRSA(filename, params);
 
     std::cout << "RSA SIGN:" << std::endl;
 
@@ -32,8 +32,8 @@ int main() {
     delete[] param_names;
     #endif
 
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignRSA(filename, params, s) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignRSA(sign_filename, params, s) << std::endl;
+    std::cout << filename << ": " << std::boolalpha << lw3::checkSignRSA(filename, params) << std::endl;
+    std::cout << sign_filename << ": " << lw3::checkSignRSA(sign_filename, params) << std::endl;
 
     return 0;
 }
@@ -48,7 +48,7 @@ int main() {
     const std::vector<ll> params = lw3::generateSignElgamalParameters();
     const std::string filename = "Ryan_Gosling.jpg";
     const std::string sign_filename = "signed_" + filename;
-    const std::pair<ll, ll> RSkeys = lw3::signElgamal(filename, params);
+    lw3::signElgamal(filename, params);
 
     std::cout << "ELGAMAL SIGN:" << std::endl;
 
@@ -61,8 +61,8 @@ int main() {
     delete[] param_names;
     #endif
 
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignElgamal(filename, params, RSkeys) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignElgamal(sign_filename, params, RSkeys) << std::endl;
+    std::cout << filename << ": " << std::boolalpha << lw3::checkSignElgamal(filename, params) << std::endl;
+    std::cout << sign_filename << ": " << lw3::checkSignElgamal(sign_filename, params) << std::endl;
 
     return 0;
 }
@@ -77,7 +77,7 @@ int main() {
     const std::vector<ll> params = lw3::generateSignGOSTParameters();
     const std::string filename = "Ryan_Gosling.jpg";
     const std::string sign_filename = "signed_" + filename;
-    const std::pair<ll, ll> RSkeys = lw3::signGOST(filename, params);
+    lw3::signGOST(filename, params);
 
     std::cout << "GOST SIGN:" << std::endl;
 
@@ -90,8 +90,8 @@ int main() {
     delete[] param_names;
     #endif
 
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignGOST(filename, params, RSkeys) << std::endl; // попробуем проверить исходный файл на "подписанность"
-    std::cout << sign_filename << ": " << lw3::checkSignGOST(sign_filename, params, RSkeys) << std::endl;
+    std::cout << filename << ": " << std::boolalpha << lw3::checkSignGOST(filename, params) << std::endl; // попробуем проверить исходный файл на "подписанность"
+    std::cout << sign_filename << ": " << lw3::checkSignGOST(sign_filename, params) << std::endl;
 
     return 0;
 }
@@ -108,7 +108,7 @@ int main() {
     std::vector<ll> params = lw2::generateRSAParameters();
     const std::string filename = "Ryan_Gosling.jpg";
     const std::string sign_filename = "signed_" + filename;
-    const ll s = lw3::signRSA(filename, params);
+    lw3::signRSA(filename, params);
 
     std::cout << "RSA SIGN:" << std::endl;
 
@@ -121,12 +121,12 @@ int main() {
     delete[] param_names;
     #endif
 
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignRSA(filename, params, s) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignRSA(sign_filename, params, s) << std::endl;
+    std::cout << filename << ": " << std::boolalpha << lw3::checkSignRSA(filename, params) << std::endl;
+    std::cout << sign_filename << ": " << lw3::checkSignRSA(sign_filename, params) << std::endl;
 
     // ELGAMAL
     params = lw3::generateSignElgamalParameters();
-    std::pair<ll, ll> RSkeys = lw3::signElgamal(filename, params);
+    lw3::signElgamal(filename, params);
 
     std::cout << "\nELGAMAL SIGN:" << std::endl;
 
@@ -139,12 +139,12 @@ int main() {
     delete[] param_names;
     #endif
 
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignElgamal(filename, params, RSkeys) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignElgamal(sign_filename, params, RSkeys) << std::endl;
+    std::cout << filename << ": " << std::boolalpha << lw3::checkSignElgamal(filename, params) << std::endl;
+    std::cout << sign_filename << ": " << lw3::checkSignElgamal(sign_filename, params) << std::endl;
 
     //GOST
     params = lw3::generateSignGOSTParameters();
-    RSkeys = lw3::signGOST(filename, params);
+    lw3::signGOST(filename, params);
 
     std::cout << "\nGOST SIGN:" << std::endl;
 
@@ -157,8 +157,8 @@ int main() {
     delete[] param_names;
     #endif
 
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignGOST(filename, params, RSkeys) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignGOST(sign_filename, params, RSkeys) << std::endl;
+    std::cout << filename << ": " << std::boolalpha << lw3::checkSignGOST(filename, params) << std::endl;
+    std::cout << sign_filename << ": " << lw3::checkSignGOST(sign_filename, params) << std::endl;
 
     return 0;
 }

@@ -40,15 +40,15 @@ namespace myCrypto {
         ll hexToDecimal(const std::string &hex_str); // str -> ll
         ll generateBigPrime();
 
-        ll signRSA(const std::string &inputFileName, const std::vector<ll> &params);
-        bool checkSignRSA(const std::string &fileNameToCheck, const std::vector<ll> &params, const ll &s);
+        void signRSA(const std::string &inputFileName, const std::vector<ll> &params);
+        bool checkSignRSA(const std::string &fileNameToCheck, const std::vector<ll> &params);
 
         std::vector<ll> generateSignElgamalParameters(); // g, p, x, y
-        std::pair<ll, ll> signElgamal(const std::string &inputFileName, const std::vector<ll> &params);
-        bool checkSignElgamal(const std::string &fileNameToCheck, const std::vector<ll> &params, const std::pair<ll, ll> &RSkeys);
+        void signElgamal(const std::string &inputFileName, const std::vector<ll> &params);
+        bool checkSignElgamal(const std::string &fileNameToCheck, const std::vector<ll> &params);
 
         std::vector<ll> generateSignGOSTParameters(); // p, q, a, x, y
-        std::pair<ll, ll> signGOST(const std::string &inputFileName, const std::vector<ll> &params);
-        bool checkSignGOST(const std::string &fileNameToCheck, const std::vector<ll> &params, const std::pair<ll, ll> &RSkeys);
+        void signGOST(const std::string &inputFileName, const std::vector<ll> &params);
+        bool checkSignGOST(const std::string &fileNameToCheck, const std::vector<ll> &params);
     }
 }

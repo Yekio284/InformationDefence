@@ -421,7 +421,7 @@ ll myCrypto::lab_third::generateBigPrime() {
 	return n;
 }
 
-ll myCrypto::lab_third::signRSA(const std::string &inputFileName, const std::vector<ll> &params) {
+void myCrypto::lab_third::signRSA(const std::string &inputFileName, const std::vector<ll> &params) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw3 = myCrypto::lab_third;
 
@@ -445,11 +445,9 @@ ll myCrypto::lab_third::signRSA(const std::string &inputFileName, const std::vec
 	//std::cout << "\tcB = " << params[0] << "\tnB = " << params[2] << "\ts = " << s << std::endl;
 
 	signedFile.write(reinterpret_cast<const char*>(&s), sizeof(s)); // Подписываем документ
-
-	return s;
 }
 
-bool myCrypto::lab_third::checkSignRSA(const std::string &fileNameToCheck, const std::vector<ll> &params, const ll &s) {
+bool myCrypto::lab_third::checkSignRSA(const std::string &fileNameToCheck, const std::vector<ll> &params) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw3 = myCrypto::lab_third;
 	namespace fs = std::filesystem;
@@ -459,8 +457,14 @@ bool myCrypto::lab_third::checkSignRSA(const std::string &fileNameToCheck, const
 	std::ofstream copyFile(copy_name, std::ios::binary);
 
 	copyFile << file.rdbuf(); // Делаем копию файла "signed_<...>" или любого другого заданного в fileNameToCheck
-	file.close();
 	copyFile.close();
+
+	file.seekg(fs::file_size(fileNameToCheck) - sizeof(ll));
+	ll s;
+	file.read(reinterpret_cast<char*>(&s), sizeof(ll));
+	file.close();
+	if (s < 0)
+		return false;
 
 	const auto path_to_file = fs::path(copy_name);
 	fs::resize_file(path_to_file, fs::file_size(path_to_file) - sizeof(ll)); // Переопредялем размер файла "copy_<..>", т.е., 
@@ -502,7 +506,7 @@ std::vector<ll> myCrypto::lab_third::generateSignElgamalParameters() {
 	return std::vector<ll>({g, p, x, y});
 }
 
-std::pair<ll, ll> myCrypto::lab_third::signElgamal(const std::string &inputFileName, const std::vector<ll> &params) {
+void myCrypto::lab_third::signElgamal(const std::string &inputFileName, const std::vector<ll> &params) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw2 = myCrypto::lab_second;
 	namespace lw3 = myCrypto::lab_third;
@@ -551,11 +555,9 @@ std::pair<ll, ll> myCrypto::lab_third::signElgamal(const std::string &inputFileN
 	// Подписываем документ
 	signedFile.write(reinterpret_cast<const char*>(&r), sizeof(r));
 	signedFile.write(reinterpret_cast<const char*>(&s), sizeof(s)); 
-
-	return std::make_pair(r, s);
 }
 
-bool myCrypto::lab_third::checkSignElgamal(const std::string &fileNameToCheck, const std::vector<ll> &params, const std::pair<ll, ll> &RSkeys) {
+bool myCrypto::lab_third::checkSignElgamal(const std::string &fileNameToCheck, const std::vector<ll> &params) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw3 = myCrypto::lab_third;
 	namespace fs = std::filesystem;
@@ -565,8 +567,15 @@ bool myCrypto::lab_third::checkSignElgamal(const std::string &fileNameToCheck, c
 	std::ofstream copyFile(copy_name, std::ios::binary);
 
 	copyFile << file.rdbuf(); // Делаем копию файла "signed_<...>" или любого другого заданного в fileNameToCheck
-	file.close();
 	copyFile.close();
+
+	file.seekg(fs::file_size(fileNameToCheck) - 2 * sizeof(ll));
+	ll r, s;
+	file.read(reinterpret_cast<char*>(&r), sizeof(ll));
+	file.read(reinterpret_cast<char*>(&s), sizeof(ll));
+	file.close();
+	if (r < 0 || s < 0)
+		return false;
 
 	const auto path_to_file = fs::path(copy_name);
 	fs::resize_file(path_to_file, fs::file_size(path_to_file) - 2 * sizeof(ll)); // Переопредялем размер файла "copy_<..>", т.е., 
@@ -581,8 +590,7 @@ bool myCrypto::lab_third::checkSignElgamal(const std::string &fileNameToCheck, c
 	
 	file.close(); // Закрываем файл "copy_<...>"
 	std::remove(copy_name.c_str()); // Удаляем файл "copy_<...>"
-
-	ll buf1 = (lw1::powMod(params[3], RSkeys.first, params[1]) * lw1::powMod(RSkeys.first, RSkeys.second, params[1])) % params[1];
+	ll buf1 = (lw1::powMod(params[3], r, params[1]) * lw1::powMod(r, s, params[1])) % params[1];
 	ll buf2 = lw1::powMod(params[0], hash_ll, params[1]);
 
 	//std::cout << "buf1 = " << buf1 << "\tbuf2 = " << buf2 << std::endl;
@@ -615,7 +623,7 @@ std::vector<ll> myCrypto::lab_third::generateSignGOSTParameters() {
 	return std::vector<ll>({p, q, a, x, y});
 }
 
-std::pair<ll, ll> myCrypto::lab_third::signGOST(const std::string &inputFileName, const std::vector<ll> &params) {
+void myCrypto::lab_third::signGOST(const std::string &inputFileName, const std::vector<ll> &params) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw3 = myCrypto::lab_third;
 	
@@ -645,11 +653,9 @@ std::pair<ll, ll> myCrypto::lab_third::signGOST(const std::string &inputFileName
 
 	signedFile.write(reinterpret_cast<const char*>(&r), sizeof(r));
 	signedFile.write(reinterpret_cast<const char*>(&s), sizeof(s));
-
-	return std::make_pair(r, s);
 }
 
-bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, const std::vector<ll> &params, const std::pair<ll, ll> &RSkeys) {
+bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, const std::vector<ll> &params) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw3 = myCrypto::lab_third;
 	namespace fs = std::filesystem;
@@ -659,8 +665,14 @@ bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, cons
 	std::ofstream copyFile(copy_name, std::ios::binary);
 
 	copyFile << file.rdbuf(); // Делаем копию файла "signed_<...>" или любого другого заданного в fileNameToCheck
-	file.close();
+	//file.close();
 	copyFile.close();
+
+	file.seekg(fs::file_size(fileNameToCheck) - 2 * sizeof(ll));
+	ll r, s;
+	file.read(reinterpret_cast<char*>(&r), sizeof(ll));
+	file.read(reinterpret_cast<char*>(&s), sizeof(ll));
+	file.close();
 
 	const auto path_to_file = fs::path(copy_name);
 	fs::resize_file(path_to_file, fs::file_size(path_to_file) - 2 * sizeof(ll)); // Переопредялем размер файла "copy_<..>", т.е., 
@@ -673,15 +685,15 @@ bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, cons
 	file.close(); // Закрываем файл "copy_<...>"
 	std::remove(copy_name.c_str()); // Удаляем файл "copy_<...>"
 
-	if (RSkeys.first >= params[1] || RSkeys.second >= params[1])
+	if (r >= params[1] || s >= params[1] || r <= 0 || s <= 0)
 		return false;
 	
 	ll h_inverted = lw1::extendedGCD(hash_ll, params[1])[1];
 	if (h_inverted < 0)
 		h_inverted = h_inverted + params[1];
 	
-	ll u1 = (RSkeys.second * h_inverted) % params[1];
-	ll u2 = ((RSkeys.first * -1) * h_inverted) % params[1];
+	ll u1 = (s * h_inverted) % params[1];
+	ll u2 = ((r * -1) * h_inverted) % params[1];
 	u2 = u2 < 0 ? u2 + params[1] : u2;
 	
 	ll v = (static_cast<__int128_t>(lw1::powMod(params[2], u1, params[0])) * 
@@ -691,5 +703,5 @@ bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, cons
 	//	h_inverted << "\nu1 = " << u1 << "\tu2 = " << u2 << std::endl;
 	//std::cout << "v = " << v << std::endl;
 	
-	return v == RSkeys.first;
+	return v == r;
 }
