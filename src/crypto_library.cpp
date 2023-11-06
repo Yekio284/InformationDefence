@@ -463,8 +463,10 @@ bool myCrypto::lab_third::checkSignRSA(const std::string &fileNameToCheck, const
 	ll s;
 	file.read(reinterpret_cast<char*>(&s), sizeof(ll));
 	file.close();
-	if (s < 0)
+	if (s < 0) {
+		std::remove(copy_name.c_str());
 		return false;
+	}
 
 	const auto path_to_file = fs::path(copy_name);
 	fs::resize_file(path_to_file, fs::file_size(path_to_file) - sizeof(ll)); // Переопредялем размер файла "copy_<..>", т.е., 
@@ -574,8 +576,10 @@ bool myCrypto::lab_third::checkSignElgamal(const std::string &fileNameToCheck, c
 	file.read(reinterpret_cast<char*>(&r), sizeof(ll));
 	file.read(reinterpret_cast<char*>(&s), sizeof(ll));
 	file.close();
-	if (r < 0 || s < 0)
+	if (r < 0 || s < 0) {
+		std::remove(copy_name.c_str());
 		return false;
+	}
 
 	const auto path_to_file = fs::path(copy_name);
 	fs::resize_file(path_to_file, fs::file_size(path_to_file) - 2 * sizeof(ll)); // Переопредялем размер файла "copy_<..>", т.е., 
