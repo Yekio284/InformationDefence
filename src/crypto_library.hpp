@@ -51,4 +51,8 @@ namespace myCrypto {
         void signGOST(const std::string &inputFileName, const std::vector<ll> &params);
         bool checkSignGOST(const std::string &fileNameToCheck, const std::vector<ll> &params);
     }
+    namespace lab_fourth {
+        class Player {};
+        class Game {};
+    }
 }
