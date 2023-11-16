@@ -52,7 +52,21 @@ namespace myCrypto {
         bool checkSignGOST(const std::string &fileNameToCheck, const std::vector<ll> &params);
     }
     namespace lab_fourth {
+        class Game {
+        private:
+            const std::vector<std::string> cardName = {"2", "3", "4", "5", "6", "7", 
+                                                       "8", "9", "10", "J", "Q", "K", "A"};
+            const std::vector<std::string> suits = {"♤", "♡", "♧", "♢"};
+            std::vector<std::string> desk;
+        public:
+            Game();
+
+            void shuffleDesk();
+            void printDesk() const;
+
+            ~Game();
+        };
+        
         class Player {};
-        class Game {};
     }
 }

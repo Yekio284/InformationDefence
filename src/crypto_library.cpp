@@ -709,3 +709,31 @@ bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, cons
 	
 	return v == r;
 }
+
+myCrypto::lab_fourth::Game::Game() : desk(52) {
+	char i = 0;
+    
+	for (const std::string &name : cardName) {
+        for (const std::string &suit : suits) {
+            desk[i] = name + suit;
+            i++;
+        }
+    }
+}
+
+void myCrypto::lab_fourth::Game::shuffleDesk() {
+	static std::random_device rand_device;
+    static std::mt19937 engine(rand_device());
+    
+	std::shuffle(desk.begin(), desk.end(), engine);
+}
+
+void myCrypto::lab_fourth::Game::printDesk() const {
+	for (const std::string &item : desk)
+    	std::cout << item << ' ';
+    std::cout << std::endl;
+}
+
+myCrypto::lab_fourth::Game::~Game() {
+	std::cout << "Thanks for playing!" << std::endl;
+}
