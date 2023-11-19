@@ -710,15 +710,24 @@ bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, cons
 	return v == r;
 }
 
-myCrypto::lab_fourth::Game::Game() : desk(52) {
+myCrypto::lab_fourth::Game::Game() : desk(52), p(0) {
+	namespace lw1 = myCrypto::lab_first;
+	
 	char i = 0;
-    
 	for (const std::string &name : cardName) {
         for (const std::string &suit : suits) {
             desk[i] = name + suit;
             i++;
         }
     }
+
+	ll q; // q - число Софи Жермен, 
+	do {
+		q = lw1::generatePrime();
+		p = 2 * q + 1;
+	} while (!lw1::isPrime(p));
+
+	// std::cout << "p = " << p << "\tq = " << q << std::endl;
 }
 
 void myCrypto::lab_fourth::Game::shuffleDesk() {
@@ -734,6 +743,27 @@ void myCrypto::lab_fourth::Game::printDesk() const {
     std::cout << std::endl;
 }
 
+ll myCrypto::lab_fourth::Game::getP() const {
+	return p;
+}
+
 myCrypto::lab_fourth::Game::~Game() {
 	std::cout << "Thanks for playing!" << std::endl;
 }
+
+myCrypto::lab_fourth::Player::Player(ll p) : c(0), d(0) {
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw2 = myCrypto::lab_second;
+
+	do {
+		c = lw1::random(1e7, 1e9);
+	} while(lw2::gcd(c, p - 1) != 1);
+
+	d = lw1::extendedGCD(c, p - 1)[1];
+	if (d < 0)
+		d = d + p - 1;
+	
+	// std::cout << std::boolalpha << ((c * d) % (p - 1) == 1) << std::endl;
+}
+
+myCrypto::lab_fourth::Player::~Player() {}

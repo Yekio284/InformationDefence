@@ -58,15 +58,25 @@ namespace myCrypto {
                                                        "8", "9", "10", "J", "Q", "K", "A"};
             const std::vector<std::string> suits = {"♤", "♡", "♧", "♢"};
             std::vector<std::string> desk;
+            ll p; // Безопасное простое число
+
         public:
             Game();
 
             void shuffleDesk();
             void printDesk() const;
+            ll getP() const;
 
             ~Game();
         };
         
-        class Player {};
+        class Player {
+        private:
+            ll c, d;
+            
+        public:
+            Player(ll p);
+            ~Player();
+        };
     }
 }
