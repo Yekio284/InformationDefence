@@ -751,7 +751,7 @@ myCrypto::lab_fourth::Game::~Game() {
 	std::cout << "Thanks for playing!" << std::endl;
 }
 
-myCrypto::lab_fourth::Player::Player(ll p) : c(0), d(0) {
+myCrypto::lab_fourth::Player::Player(const ll &p) : c(0), d(0) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw2 = myCrypto::lab_second;
 

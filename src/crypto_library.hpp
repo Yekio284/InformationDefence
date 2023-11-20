@@ -75,7 +75,7 @@ namespace myCrypto {
             ll c, d;
             
         public:
-            Player(ll p);
+            Player(const ll &p);
             ~Player();
         };
     }
