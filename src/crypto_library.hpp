@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <map>
 
 typedef long long ll;
 
@@ -57,15 +58,17 @@ namespace myCrypto {
             const std::vector<std::string> cardName = {"2", "3", "4", "5", "6", "7", 
                                                        "8", "9", "10", "J", "Q", "K", "A"};
             const std::vector<std::string> suits = {"♤", "♡", "♧", "♢"};
-            std::vector<std::string> desk;
+            std::vector<std::string> fullCardNames;
             ll p; // Безопасное простое число
 
         public:
             Game();
 
             void shuffleDesk();
-            void printDesk() const;
+            void printFullCardNames() const;
             ll getP() const;
+            std::vector<std::string> getFullCardNames() const;
+            std::map<ll, std::string> generateDeck() const;
 
             ~Game();
         };
@@ -73,9 +76,13 @@ namespace myCrypto {
         class Player {
         private:
             ll c, d;
-            
+
         public:
+            Player();
             Player(const ll &p);
+
+            void encryptAndShuffleDeck(const ll &p, std::vector<ll> &nums) const;
+
             ~Player();
         };
     }

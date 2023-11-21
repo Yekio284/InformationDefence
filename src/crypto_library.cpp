@@ -710,13 +710,13 @@ bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, cons
 	return v == r;
 }
 
-myCrypto::lab_fourth::Game::Game() : desk(52), p(0) {
+myCrypto::lab_fourth::Game::Game() : fullCardNames(52), p(0) {
 	namespace lw1 = myCrypto::lab_first;
 	
 	char i = 0;
 	for (const std::string &name : cardName) {
         for (const std::string &suit : suits) {
-            desk[i] = name + suit;
+            fullCardNames[i] = name + suit;
             i++;
         }
     }
@@ -734,11 +734,11 @@ void myCrypto::lab_fourth::Game::shuffleDesk() {
 	static std::random_device rand_device;
     static std::mt19937 engine(rand_device());
     
-	std::shuffle(desk.begin(), desk.end(), engine);
+	std::shuffle(fullCardNames.begin(), fullCardNames.end(), engine);
 }
 
-void myCrypto::lab_fourth::Game::printDesk() const {
-	for (const std::string &item : desk)
+void myCrypto::lab_fourth::Game::printFullCardNames() const {
+	for (const std::string &item : fullCardNames)
     	std::cout << item << ' ';
     std::cout << std::endl;
 }
@@ -747,9 +747,32 @@ ll myCrypto::lab_fourth::Game::getP() const {
 	return p;
 }
 
+std::vector<std::string> myCrypto::lab_fourth::Game::getFullCardNames() const {
+	return fullCardNames;
+}
+
+std::map<ll, std::string> myCrypto::lab_fourth::Game::generateDeck() const {
+	namespace lw1 = myCrypto::lab_first;
+	
+	std::map<ll, std::string> resMap;
+	ll keyNum;
+	
+	std::for_each(fullCardNames.begin(), fullCardNames.end(), [this, &resMap, &keyNum](std::string name){
+		do {
+			keyNum = lw1::random(2, p - 1);
+		} while (resMap.contains(keyNum));
+		
+		resMap[keyNum] = name;
+	});
+
+	return resMap;
+}
+
 myCrypto::lab_fourth::Game::~Game() {
 	std::cout << "Thanks for playing!" << std::endl;
 }
+
+myCrypto::lab_fourth::Player::Player() {}
 
 myCrypto::lab_fourth::Player::Player(const ll &p) : c(0), d(0) {
 	namespace lw1 = myCrypto::lab_first;
@@ -763,7 +786,19 @@ myCrypto::lab_fourth::Player::Player(const ll &p) : c(0), d(0) {
 	if (d < 0)
 		d = d + p - 1;
 	
+	// std::cout << "\tc = " << c << "\td = " << d << std::endl;
 	// std::cout << std::boolalpha << ((c * d) % (p - 1) == 1) << std::endl;
+}
+
+void myCrypto::lab_fourth::Player::encryptAndShuffleDeck(const ll &p, std::vector<ll> &nums) const {
+	namespace lw1 = myCrypto::lab_first;
+
+	for (auto &element : nums)
+		element = lw1::powMod(element, c, p);
+	
+	static std::random_device rand_device;
+	static std::mt19937 engine(rand_device());
+	std::shuffle(nums.begin(), nums.end(), engine);
 }
 
 myCrypto::lab_fourth::Player::~Player() {}
