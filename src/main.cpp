@@ -41,7 +41,7 @@ int main() {
     auto deck = game.generateDeck();
 
     #if DEBUGDECK
-    int i = 1;
+    short i = 1;
     std::for_each(deck.begin(), deck.end(), [&i](const std::pair<ll, std::string> p){
         std::cout << "i = " << i << "\tfirst = " << p.first << "\tsecond = " << p.second << std::endl;
         i++;
