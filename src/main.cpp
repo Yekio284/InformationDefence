@@ -69,7 +69,11 @@ int main() {
         decimalCards[k] = p.first;                                                                   // в отдельный вектор
         k++;                                                                                         //
     });                                                                                              //
-    
+
+    std::vector<ll> cardsToPutOnTable(5);
+    std::copy(decimalCards.begin() + 2 * n, decimalCards.begin() + 2 * n + 5, cardsToPutOnTable.begin());
+    decimalCards.erase(decimalCards.begin() + 2 * n, decimalCards.begin() + 2 * n + 5);
+
     logging << "\nWrote deck's keys to decimalCards vector" << std::endl << std::endl; // Логируем инфу о том, что создали вектор decimalCards
 
     std::for_each(players.begin(), players.end(), [&decimalCards, &game](lw4_Player player){  //
@@ -89,6 +93,12 @@ int main() {
         players[j].decryptAndSetCards(players, deck, game.getP(), j); //
     
     logging << "Players decrypted their cards" << std::endl << std::endl; // Логируем инфу о том, что игроки расшифровали свои карты
+
+    std::cout << "Cards on a table: ";
+    std::for_each(cardsToPutOnTable.begin(), cardsToPutOnTable.end(), [&deck](ll n){
+        std::cout << deck[n] << ' ';
+    });
+    std::cout << std::endl;
 
     std::for_each (players.begin(), players.end(), [](lw4_Player player){ //
         player.showCards();                                               // Каждый игрок показывает свои карты
