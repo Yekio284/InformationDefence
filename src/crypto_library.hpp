@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <utility>
 #include <map>
 
 typedef long long ll;
@@ -53,6 +54,8 @@ namespace myCrypto {
         bool checkSignGOST(const std::string &fileNameToCheck, const std::vector<ll> &params);
     }
     namespace lab_fourth {
+        class Player;
+        
         class Game {
         private:
             const std::vector<std::string> cardName = {"2", "3", "4", "5", "6", "7", 
@@ -64,11 +67,10 @@ namespace myCrypto {
         public:
             Game();
 
-            void shuffleDesk();
-            void printFullCardNames() const;
             ll getP() const;
-            std::vector<std::string> getFullCardNames() const;
             std::map<ll, std::string> generateDeck() const;
+            void giveEncryptedCardsToPlayers(const std::vector<ll> &cards, 
+                                             std::vector<myCrypto::lab_fourth::Player> &players) const;
 
             ~Game();
         };
@@ -76,12 +78,22 @@ namespace myCrypto {
         class Player {
         private:
             ll c, d;
+            std::pair<ll, ll> encryptedCards;
+            std::pair<std::string, std::string> decryptedCards;
 
         public:
             Player();
-            Player(const ll &p);
+            explicit Player(const ll &p);
 
             void encryptAndShuffleDeck(const ll &p, std::vector<ll> &nums) const;
+            void setEncryptedCards(const std::pair<ll, ll> encryptedCards);
+            ll getLeftEncryptedCard() const;
+            ll getRightEncryptedCard() const;
+            ll getC() const;
+            ll getD() const;
+            void decryptAndSetCards(const std::vector<myCrypto::lab_fourth::Player> &players, 
+                                    std::map<ll, std::string> &deck, const ll &p, const short i);
+            void showCards() const;
 
             ~Player();
         };

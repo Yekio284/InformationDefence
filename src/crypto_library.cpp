@@ -17,6 +17,15 @@ inline std::ostream &operator<<(std::ostream &out, __int128_t val) { // https://
     return out << static_cast<uint64_t>(val);
 }
 
+template <typename T> // T = стандартные типы - int, ll, char, std::string, float...
+inline std::ostream& operator<<(std::ostream &out, const std::pair<T, T> &pairToCout) {
+	out << pairToCout.first;
+	out << ' ';
+	out << pairToCout.second;
+
+	return out;
+}
+
 ll myCrypto::lab_first::powMod(__int128_t a, __int128_t x, __int128_t p) {
     ll result = 1;
 
@@ -710,8 +719,8 @@ bool myCrypto::lab_third::checkSignGOST(const std::string &fileNameToCheck, cons
 	return v == r;
 }
 
-myCrypto::lab_fourth::Game::Game() : fullCardNames(52), p(0) {
-	namespace lw1 = myCrypto::lab_first;
+myCrypto::lab_fourth::Game::Game() : fullCardNames(52), p(0) { // Конструктор класса Game. При создании объекта
+	namespace lw1 = myCrypto::lab_first;                       // класса Game вместе с ним сгенерируется число "p"
 	
 	char i = 0;
 	for (const std::string &name : cardName) {
@@ -730,25 +739,8 @@ myCrypto::lab_fourth::Game::Game() : fullCardNames(52), p(0) {
 	// std::cout << "p = " << p << "\tq = " << q << std::endl;
 }
 
-void myCrypto::lab_fourth::Game::shuffleDesk() {
-	static std::random_device rand_device;
-    static std::mt19937 engine(rand_device());
-    
-	std::shuffle(fullCardNames.begin(), fullCardNames.end(), engine);
-}
-
-void myCrypto::lab_fourth::Game::printFullCardNames() const {
-	for (const std::string &item : fullCardNames)
-    	std::cout << item << ' ';
-    std::cout << std::endl;
-}
-
 ll myCrypto::lab_fourth::Game::getP() const {
 	return p;
-}
-
-std::vector<std::string> myCrypto::lab_fourth::Game::getFullCardNames() const {
-	return fullCardNames;
 }
 
 std::map<ll, std::string> myCrypto::lab_fourth::Game::generateDeck() const {
@@ -768,6 +760,12 @@ std::map<ll, std::string> myCrypto::lab_fourth::Game::generateDeck() const {
 	return resMap;
 }
 
+void myCrypto::lab_fourth::Game::giveEncryptedCardsToPlayers(const std::vector<ll> &cards, std::vector<myCrypto::lab_fourth::Player> &players) const {
+	for (short j = 0, k = 0; k < players.size(); j = j + 2, k++) {
+		players[k].setEncryptedCards(std::make_pair(cards[j], cards[j + 1])); 
+	}
+}
+
 myCrypto::lab_fourth::Game::~Game() {
 	std::cout << "Thanks for playing!" << std::endl;
 }
@@ -780,7 +778,7 @@ myCrypto::lab_fourth::Player::Player(const ll &p) : c(0), d(0) {
 
 	do {
 		c = lw1::random(1e7, 1e9);
-	} while(lw2::gcd(c, p - 1) != 1);
+	} while (lw2::gcd(c, p - 1) != 1);
 
 	d = lw1::extendedGCD(c, p - 1)[1];
 	if (d < 0)
@@ -799,6 +797,51 @@ void myCrypto::lab_fourth::Player::encryptAndShuffleDeck(const ll &p, std::vecto
 	static std::random_device rand_device;
 	static std::mt19937 engine(rand_device());
 	std::shuffle(nums.begin(), nums.end(), engine);
+}
+
+void myCrypto::lab_fourth::Player::setEncryptedCards(const std::pair<ll, ll> encryptedCards) {
+	this->encryptedCards = encryptedCards;
+}
+
+ll myCrypto::lab_fourth::Player::getLeftEncryptedCard() const {
+	return encryptedCards.first;
+}
+
+ll myCrypto::lab_fourth::Player::getRightEncryptedCard() const {
+	return encryptedCards.second;
+}
+
+ll myCrypto::lab_fourth::Player::getC() const {
+	return c;
+}
+
+ll myCrypto::lab_fourth::Player::getD() const {
+	return d;
+}
+
+void myCrypto::lab_fourth::Player::decryptAndSetCards(const std::vector<myCrypto::lab_fourth::Player> &players, std::map<ll, std::string> &deck, 
+													  const ll &p, const short i) {
+	namespace lw1 = myCrypto::lab_first;
+	
+	ll leftCard = getLeftEncryptedCard(), rightCard = getRightEncryptedCard();
+	
+	for (short j = 0; j < players.size(); j++) {
+		if (j != i) {
+			leftCard = lw1::powMod(leftCard, players[j].getD(), p);
+			rightCard = lw1::powMod(rightCard, players[j].getD(), p);
+		}
+	}
+
+	leftCard = lw1::powMod(leftCard, d, p);
+	rightCard = lw1::powMod(rightCard, d, p);
+
+	// std::cout << leftCard << ' ' << rightCard << std::endl;
+
+	decryptedCards = std::make_pair(deck[leftCard], deck[rightCard]);
+}
+
+void myCrypto::lab_fourth::Player::showCards() const {
+	std::cout << decryptedCards << std::endl;
 }
 
 myCrypto::lab_fourth::Player::~Player() {}
