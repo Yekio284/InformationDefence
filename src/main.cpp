@@ -1,166 +1,117 @@
 #include <iostream>
-#include <string>
-#include <vector>
+#include <utility>
+#include <limits>
 #include <algorithm>
+#include <vector>
+#include <map>
+#include <fstream>
+#include <ctime>
+#include <iomanip>
 #include "crypto_library.hpp"
 
-#define RSA 0
-#define ELGAMAL 0
-#define GOST 0
-#define ALL 1
-#define DEBUGPARAMS 0
+typedef myCrypto::lab_fourth::Game lw4_Game;
+typedef myCrypto::lab_fourth::Player lw4_Player;
 
-#if RSA
+std::string currentDateTime() { // Узнаём текущую дату и врему
+    std::time_t t = std::time(nullptr);
+    std::tm* now = std::localtime(&t);
+ 
+    char buffer[128];
+    strftime(buffer, sizeof(buffer), "%m-%d-%Y %X", now);
+    
+    return buffer;
+}
 
 int main() {
-    namespace lw2 = myCrypto::lab_second;
-    namespace lw3 = myCrypto::lab_third;
+    lw4_Game game;
+    std::ofstream logging("log.txt");
 
-    const std::vector<ll> params = lw2::generateRSAParameters();
-    const std::string filename = "Ryan_Gosling.jpg";
-    const std::string sign_filename = "signed_" + filename;
-    lw3::signRSA(filename, params);
+    int n = 0; // Кол-во игроков
+    while (n < 2 || n > 23) {
+        try {
+            std::cout << "Enter num of players (2-23 or -1 to exit): ";
+            std::cin >> n;
+            if (std::cin.fail()) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                throw std::string("Incorrect input. Enter an integer number");
+            }
+            
+            if (n == -1)
+                return 0;
+            else if (n < 2 || n > 23)
+                throw std::string("Incorrect input."); 
+        }
+        catch (const std::string err) {
+            std::cout << err << std::endl;
+        }
+        catch (const std::exception &err) {
+            std::cout << "Something went wrong... " << err.what() << std::endl;
+        }
+    }
+    
+    logging << "Game time: " << currentDateTime() << std::endl << "Number of players: " << n << std::endl << std::endl; // Логируем дату и время
+    logging << "Generated \"p\": " << game.getP() << std::endl; // Логируем "p"
 
-    std::cout << "RSA SIGN:" << std::endl;
+    std::vector<lw4_Player> players(n);
+    std::generate(players.begin(), players.end(), [&game](){ return lw4_Player(game.getP()); }); // Генерируем массив игроков
 
-    #if DEBUGPARAMS
-    char *param_names = new char[3]{'c', 'd', 'N'};
-    std::for_each(params.begin(), params.end(), [param_names](long long n) mutable { 
-        std::cout << *param_names << " = " << n << std::endl; 
-        param_names++;
+    auto deck = game.generateDeck(); // Генерируем игральную колоду, где каждому уникальному номеру (ключу) соответствует уникальная карта
+
+    logging << "\nGenerated deck:" << std::endl;                                            //
+    std::for_each(deck.begin(), deck.end(), [&logging](const std::pair<ll, std::string> p){ // Логируем колоду
+        logging << "num = "  << p.first << "\tstring = " << p.second << std::endl;          //
+    });                                                                                     //
+
+    short k = 0;                                                                                     //
+    std::vector<ll> decimalCards(52);                                                                //
+    std::for_each(deck.begin(), deck.end(), [&decimalCards, &k](const std::pair<ll, std::string> p){ // Переписываем уникальные ключи deck 
+        decimalCards[k] = p.first;                                                                   // в отдельный вектор
+        k++;                                                                                         //
+    });                                                                                              //
+
+    std::vector<ll> cardsToPutOnTable(5);
+    std::copy(decimalCards.begin() + 2 * n, decimalCards.begin() + 2 * n + 5, cardsToPutOnTable.begin());
+    decimalCards.erase(decimalCards.begin() + 2 * n, decimalCards.begin() + 2 * n + 5);
+
+    logging << "\nWrote deck's keys to decimalCards vector" << std::endl << std::endl; // Логируем инфу о том, что создали вектор decimalCards
+
+    std::for_each(players.begin(), players.end(), [&decimalCards, &game](lw4_Player player){  //
+        player.encryptAndShuffleDeck(game.getP(), decimalCards);                              // Шифруем и перемешиваем карты
+    });                                                                                       //
+
+    logging << "Encrypted cards:" << std::endl;                                  //
+    std::for_each(decimalCards.begin(), decimalCards.end(), [&logging](ll card){ // Логируем зашифрованные карты
+        logging << card << std::endl;                                            //
+    });                                                                          //
+
+    game.giveEncryptedCardsToPlayers(decimalCards, players); // Выдаём зашифрованные карты игрокам
+    
+    logging << "\nGave encrypted cards to players" << std::endl << std::endl; // Логируем инфу о том, что выдали зашифрованные карты
+
+    for (short j = 0; j < players.size(); j++)                        // Каждый игрок расшифровывает свои карты 
+        players[j].decryptAndSetCards(players, deck, game.getP(), j); //
+    
+    logging << "Players decrypted their cards" << std::endl << std::endl; // Логируем инфу о том, что игроки расшифровали свои карты
+
+    std::cout << "Cards on a table: ";
+    std::for_each(cardsToPutOnTable.begin(), cardsToPutOnTable.end(), [&deck](ll n){
+        std::cout << deck[n] << ' ';
     });
-    delete[] param_names;
-    #endif
+    std::cout << std::endl;
 
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignRSA(filename, params) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignRSA(sign_filename, params) << std::endl;
+    std::for_each (players.begin(), players.end(), [](lw4_Player player){ //
+        player.showCards();                                               // Каждый игрок показывает свои карты
+    });                                                                   //
+    
+    k = 1;                                                                                               //
+    logging << "Player's C/D keys:" << std::endl;                                                        //
+    std::for_each(players.begin(), players.end(), [&k, &logging](lw4_Player player){                     // Логируем инфу о C, D ключах игроков 
+        logging << "Player " << k << ": C = " << player.getC() << " D = " << player.getD() << std::endl; //
+        k++;                                                                                             //
+    });                                                                                                  //
+
+    logging.close();
 
     return 0;
 }
-
-#endif
-
-#if ELGAMAL
-
-int main() {
-    namespace lw3 = myCrypto::lab_third;
-
-    const std::vector<ll> params = lw3::generateSignElgamalParameters();
-    const std::string filename = "Ryan_Gosling.jpg";
-    const std::string sign_filename = "signed_" + filename;
-    lw3::signElgamal(filename, params);
-
-    std::cout << "ELGAMAL SIGN:" << std::endl;
-
-    #if DEBUGPARAMS
-    char *param_names = new char[4]{'g', 'p', 'x', 'y'};
-    std::for_each(params.begin(), params.end(), [param_names](long long n) mutable { 
-        std::cout << *param_names << " = " << n << std::endl; 
-        param_names++;
-    });
-    delete[] param_names;
-    #endif
-
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignElgamal(filename, params) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignElgamal(sign_filename, params) << std::endl;
-
-    return 0;
-}
-
-#endif
-
-#if GOST
-
-int main() {
-    namespace lw3 = myCrypto::lab_third;
-
-    const std::vector<ll> params = lw3::generateSignGOSTParameters();
-    const std::string filename = "Ryan_Gosling.jpg";
-    const std::string sign_filename = "signed_" + filename;
-    lw3::signGOST(filename, params);
-
-    std::cout << "GOST SIGN:" << std::endl;
-
-    #if DEBUGPARAMS
-    char *param_names = new char[5]{'p', 'q', 'a', 'x', 'y'};
-    std::for_each(params.begin(), params.end(), [param_names](long long n) mutable { 
-        std::cout << *param_names << " = " << n << std::endl; 
-        param_names++;
-    });
-    delete[] param_names;
-    #endif
-
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignGOST(filename, params) << std::endl; // попробуем проверить исходный файл на "подписанность"
-    std::cout << sign_filename << ": " << lw3::checkSignGOST(sign_filename, params) << std::endl;
-
-    return 0;
-}
-
-#endif
-
-#if ALL
-
-int main() {
-    namespace lw2 = myCrypto::lab_second;
-    namespace lw3 = myCrypto::lab_third;
-
-    // RSA
-    std::vector<ll> params = lw2::generateRSAParameters();
-    const std::string filename = "Ryan_Gosling.jpg";
-    const std::string sign_filename = "signed_" + filename;
-    lw3::signRSA(filename, params);
-
-    std::cout << "RSA SIGN:" << std::endl;
-
-    #if DEBUGPARAMS
-    char *param_names = new char[3]{'c', 'd', 'N'};
-    std::for_each(params.begin(), params.end(), [param_names](long long n) mutable { 
-        std::cout << *param_names << " = " << n << std::endl; 
-        param_names++;
-    });
-    delete[] param_names;
-    #endif
-
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignRSA(filename, params) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignRSA(sign_filename, params) << std::endl;
-
-    // ELGAMAL
-    params = lw3::generateSignElgamalParameters();
-    lw3::signElgamal(filename, params);
-
-    std::cout << "\nELGAMAL SIGN:" << std::endl;
-
-    #if DEBUGPARAMS
-    param_names = new char[4]{'g', 'p', 'x', 'y'};
-    std::for_each(params.begin(), params.end(), [param_names](long long n) mutable { 
-        std::cout << *param_names << " = " << n << std::endl; 
-        param_names++;
-    });
-    delete[] param_names;
-    #endif
-
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignElgamal(filename, params) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignElgamal(sign_filename, params) << std::endl;
-
-    //GOST
-    params = lw3::generateSignGOSTParameters();
-    lw3::signGOST(filename, params);
-
-    std::cout << "\nGOST SIGN:" << std::endl;
-
-    #if DEBUGPARAMS
-    param_names = new char[5]{'p', 'q', 'a', 'x', 'y'};
-    std::for_each(params.begin(), params.end(), [param_names](long long n) mutable { 
-        std::cout << *param_names << " = " << n << std::endl; 
-        param_names++;
-    });
-    delete[] param_names;
-    #endif
-
-    std::cout << filename << ": " << std::boolalpha << lw3::checkSignGOST(filename, params) << std::endl;
-    std::cout << sign_filename << ": " << lw3::checkSignGOST(sign_filename, params) << std::endl;
-
-    return 0;
-}
-
-#endif

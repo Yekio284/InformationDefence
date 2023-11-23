@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <utility>
+#include <map>
 
 typedef long long ll;
 
@@ -50,5 +52,50 @@ namespace myCrypto {
         std::vector<ll> generateSignGOSTParameters(); // p, q, a, x, y
         void signGOST(const std::string &inputFileName, const std::vector<ll> &params);
         bool checkSignGOST(const std::string &fileNameToCheck, const std::vector<ll> &params);
+    }
+    namespace lab_fourth {
+        class Player;
+        
+        class Game {
+        private:
+            const std::vector<std::string> cardName = {"2", "3", "4", "5", "6", "7", 
+                                                       "8", "9", "10", "J", "Q", "K", "A"};
+            const std::vector<std::string> suits = {"♤", "♡", "♧", "♢"};
+            std::vector<std::string> fullCardNames;
+            ll p; // Безопасное простое число
+
+        public:
+            Game();
+
+            ll getP() const;
+            std::map<ll, std::string> generateDeck() const;
+            void giveEncryptedCardsToPlayers(const std::vector<ll> &cards, 
+                                             std::vector<myCrypto::lab_fourth::Player> &players) const;
+
+            ~Game();
+        };
+        
+        class Player {
+        private:
+            ll c, d;
+            std::pair<ll, ll> encryptedCards;
+            std::pair<std::string, std::string> decryptedCards;
+
+        public:
+            Player();
+            explicit Player(const ll &p);
+
+            void encryptAndShuffleDeck(const ll &p, std::vector<ll> &nums) const;
+            void setEncryptedCards(const std::pair<ll, ll> encryptedCards);
+            ll getLeftEncryptedCard() const;
+            ll getRightEncryptedCard() const;
+            ll getC() const;
+            ll getD() const;
+            void decryptAndSetCards(const std::vector<myCrypto::lab_fourth::Player> &players, 
+                                    std::map<ll, std::string> &deck, const ll &p, const short i);
+            void showCards() const;
+
+            ~Player();
+        };
     }
 }
