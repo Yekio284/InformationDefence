@@ -98,4 +98,7 @@ namespace myCrypto {
             ~Player();
         };
     }
+    namespace lab_fifth {
+        
+    }
 }
