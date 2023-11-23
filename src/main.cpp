@@ -111,5 +111,7 @@ int main() {
         k++;                                                                                             //
     });                                                                                                  //
 
+    logging.close();
+
     return 0;
 }
