@@ -892,8 +892,8 @@ void myCrypto::lab_fifth::Client::generate_n(const ll &address, const char vote)
 	
 	n = rnd_copy * lw1::binPow(10, (ll)std::log10(address) + 1) + address;
 
-	//std::cout << "rnd = " << rnd << "\taddress = " << address << "\tvote = " << (short)vote << std::endl;
-	//std::cout << "n = " << n << std::endl;
+	// std::cout << "rnd = " << rnd << "\taddress = " << address << "\tvote = " << (short)vote << std::endl;
+	// std::cout << "n = " << n << std::endl;
 }
 
 void myCrypto::lab_fifth::Client::generate_r(const ll &n) {
@@ -903,6 +903,16 @@ void myCrypto::lab_fifth::Client::generate_r(const ll &n) {
 	do {
 		r = lw1::random(1e7, 1e9);
 	} while (lw2::gcd(r, n) != 1);
+
+	// std::cout << "r = " << r << std::endl;
+}
+
+ll myCrypto::lab_fifth::Client::getN() const {
+	return n;
+}
+
+ll myCrypto::lab_fifth::Client::getR() const {
+	return r;
 }
 
 ll myCrypto::lab_fifth::Client::getId() const {

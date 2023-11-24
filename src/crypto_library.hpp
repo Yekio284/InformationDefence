@@ -127,9 +127,11 @@ namespace myCrypto {
         public:
             Client();
 
-            void generate_n(const ll &address, char vote);
+            void generate_n(const ll &address, const char vote);
             void generate_r(const ll &n);
 
+            ll getN() const;
+            ll getR() const;
             ll getId() const;
 
             ~Client();
