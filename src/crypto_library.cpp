@@ -848,16 +848,20 @@ void myCrypto::lab_fourth::Player::showCards() const {
 
 myCrypto::lab_fourth::Player::~Player() {}
 
-myCrypto::lab_fifth::Server::Server() : c(0), d(0), n(0) {
+myCrypto::lab_fifth::Server::Server() : c(0), d(0), n(0), address(0) {
+	namespace lw1 = myCrypto::lab_first;
 	namespace lw2 = myCrypto::lab_second;
 
 	std::vector<ll> RSA_Parameters = lw2::generateRSAParameters();
-	
+
 	c = RSA_Parameters[0];
 	d = RSA_Parameters[1];
 	n = RSA_Parameters[2];
 
+	address = lw1::random(1e5, 1e7);
+
 	// std::cout << "c = " << c << "\td = " << d << "\tn = " << n << std::endl;
+	// std::cout << "address = " << address << std::endl;
 }
 
 ll myCrypto::lab_fifth::Server::getC() const {
@@ -872,4 +876,37 @@ ll myCrypto::lab_fifth::Server::getN() const {
 	return n;
 }
 
+ll myCrypto::lab_fifth::Server::getAddress() const {
+	return address;
+}
+
 myCrypto::lab_fifth::Server::~Server() {}
+
+myCrypto::lab_fifth::Client::Client() : rnd(myCrypto::lab_first::random(1e7, 1e9)), n(0), r(0), id(++count) {}
+
+void myCrypto::lab_fifth::Client::generate_n(const ll &address, const char vote) {
+	namespace lw1 = myCrypto::lab_first;
+	
+	ll rnd_copy = rnd;
+	rnd_copy = rnd_copy * 10 + vote;
+	
+	n = rnd_copy * lw1::binPow(10, (ll)std::log10(address) + 1) + address;
+
+	//std::cout << "rnd = " << rnd << "\taddress = " << address << "\tvote = " << (short)vote << std::endl;
+	//std::cout << "n = " << n << std::endl;
+}
+
+void myCrypto::lab_fifth::Client::generate_r(const ll &n) {
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw2 = myCrypto::lab_second;
+
+	do {
+		r = lw1::random(1e7, 1e9);
+	} while (lw2::gcd(r, n) != 1);
+}
+
+ll myCrypto::lab_fifth::Client::getId() const {
+	return id;
+}
+
+myCrypto::lab_fifth::Client::~Client() {}

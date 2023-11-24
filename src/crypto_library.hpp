@@ -87,10 +87,12 @@ namespace myCrypto {
 
             void encryptAndShuffleDeck(const ll &p, std::vector<ll> &nums) const;
             void setEncryptedCards(const std::pair<ll, ll> encryptedCards);
+            
             ll getLeftEncryptedCard() const;
             ll getRightEncryptedCard() const;
             ll getC() const;
             ll getD() const;
+            
             void decryptAndSetCards(const std::vector<myCrypto::lab_fourth::Player> &players, 
                                     std::map<ll, std::string> &deck, const ll &p, const short i);
             void showCards() const;
@@ -102,6 +104,8 @@ namespace myCrypto {
         class Server {
         private:
             ll c, d, n;    // c - секретный ключ; d, n - открытые
+            ll address;
+            std::vector<ll> voters;
 
         public:
             Server();
@@ -109,13 +113,25 @@ namespace myCrypto {
             ll getC() const;
             ll getD() const;
             ll getN() const;
+            ll getAddress() const;
 
             ~Server();
         };
 
         class Client {
+        private:
+            static inline ll count;
+            ll rnd, n, r;
+            ll id;
+            
         public:
             Client();
+
+            void generate_n(const ll &address, char vote);
+            void generate_r(const ll &n);
+
+            ll getId() const;
+
             ~Client();
         };
     }
