@@ -17,7 +17,6 @@ int main() {
     std::vector<lw5_Client> votersVec(6);
     std::for_each(votersVec.begin(), votersVec.end(), [&server](lw5_Client client){ 
         client.generate_n(server.getAddress(), lw1::random(0, 2)); 
-        std::cout << client.getN() << std::endl;
         client.generate_r(server.getN());
     });
 
