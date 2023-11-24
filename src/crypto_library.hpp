@@ -99,6 +99,19 @@ namespace myCrypto {
         };
     }
     namespace lab_fifth {
-        
+        class Server {
+        private:
+            ll c, d, n;    // c - секретный ключ; d, n - открытые
+
+        public:
+            Server();
+            ~Server();
+        };
+
+        class Client {
+        public:
+            Client();
+            ~Client();
+        };
     }
 }

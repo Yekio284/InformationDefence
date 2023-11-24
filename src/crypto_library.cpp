@@ -336,7 +336,9 @@ std::vector<ll> myCrypto::lab_second::generateRSAParameters() { // cB, dB, nB
 		dB = lw1::random(1e7, phi);
 	ll buf_num = lw1::extendedGCD(dB, phi)[1];
 	ll cB = buf_num < 0 ? buf_num + phi : buf_num;
-
+	
+	// std::cout << "phi = " << phi << "\tp = " << pB << "\tq = " << qB << std::endl;
+	
 	return std::vector<ll>({cB, dB, nB}); // cB, dB, nB
 }
 
@@ -845,3 +847,17 @@ void myCrypto::lab_fourth::Player::showCards() const {
 }
 
 myCrypto::lab_fourth::Player::~Player() {}
+
+myCrypto::lab_fifth::Server::Server() : c(0), d(0), n(0) {
+	namespace lw2 = myCrypto::lab_second;
+
+	std::vector<ll> RSA_Parameters = lw2::generateRSAParameters();
+	
+	c = RSA_Parameters[0];
+	d = RSA_Parameters[1];
+	n = RSA_Parameters[2];
+
+	// std::cout << "c = " << c << "\td = " << d << "\tn = " << n << std::endl;
+}
+
+myCrypto::lab_fifth::Server::~Server() {}
