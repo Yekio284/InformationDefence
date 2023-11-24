@@ -105,6 +105,11 @@ namespace myCrypto {
 
         public:
             Server();
+
+            ll getC() const;
+            ll getD() const;
+            ll getN() const;
+
             ~Server();
         };
 

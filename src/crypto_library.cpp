@@ -860,4 +860,16 @@ myCrypto::lab_fifth::Server::Server() : c(0), d(0), n(0) {
 	// std::cout << "c = " << c << "\td = " << d << "\tn = " << n << std::endl;
 }
 
+ll myCrypto::lab_fifth::Server::getC() const {
+	return c;
+}
+
+ll myCrypto::lab_fifth::Server::getD() const {
+	return d;
+}
+
+ll myCrypto::lab_fifth::Server::getN() const {
+	return n;
+}
+
 myCrypto::lab_fifth::Server::~Server() {}
