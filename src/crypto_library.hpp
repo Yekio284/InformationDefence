@@ -5,6 +5,7 @@
 #include <fstream>
 #include <utility>
 #include <map>
+#include "../external/ap/ap.hpp"
 
 typedef long long ll;
 
@@ -103,12 +104,16 @@ namespace myCrypto {
     namespace lab_fifth {
         class Server {
         private:
-            ll c, d, n;    // c - секретный ключ; d, n - открытые
+            ll c, d, n; // c - секретный ключ; d, n - открытые
             ll address;
             std::vector<ll> voters;
 
         public:
             Server();
+
+            ll addVoterAndComputeS1(const ll &id, const ll &h1);
+            
+            bool recieveBulletinAndAddToDB(const ll &n, const ll &s, const ll &id) const;
 
             ll getC() const;
             ll getD() const;
@@ -123,16 +128,28 @@ namespace myCrypto {
             static inline ll count;
             ll rnd, n, r;
             ll id;
+            ll h1, s1, s;
+            char vote;
+            ap_uint<256> h;
             
         public:
             Client();
+            
+            void setVote(const char vote);
+            void setS1(const ll &s1);
 
-            void generate_n(const ll &address, const char vote);
+            void generate_n(const ll &address);
             void generate_r(const ll &n);
+            void generate_h();
+            void compute_h1(const ll &d, const ll &n);
+            void compute_s(const ll &n);
 
             ll getN() const;
             ll getR() const;
             ll getId() const;
+            ll getH1() const;
+            ll getS() const;
+            char getVote() const;
 
             ~Client();
         };

@@ -9,8 +9,10 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+#include <numeric>
 #include "crypto_library.hpp"
 #include "../external/PicoSHA2/picosha2.h"
+#include "../external/ap/ap.hpp"
 
 inline std::ostream &operator<<(std::ostream &out, __int128_t val) { // https://stackoverflow.com/questions/66053030/overload-of-stdostream-for-int128-t-ambiguous-when-called-from-a-namespace
     //Obviously not the real implementation, just here as an example
@@ -848,7 +850,7 @@ void myCrypto::lab_fourth::Player::showCards() const {
 
 myCrypto::lab_fourth::Player::~Player() {}
 
-myCrypto::lab_fifth::Server::Server() : c(0), d(0), n(0), address(0) {
+myCrypto::lab_fifth::Server::Server() : c(0), d(0), n(0), address(0), voters(0) {
 	namespace lw1 = myCrypto::lab_first;
 	namespace lw2 = myCrypto::lab_second;
 
@@ -860,8 +862,53 @@ myCrypto::lab_fifth::Server::Server() : c(0), d(0), n(0), address(0) {
 
 	address = lw1::random(1e5, 1e7);
 
+	std::ofstream database("database.csv", std::ios::app);
+	database << "id;n;s\n";
+	database.close();
+
 	// std::cout << "c = " << c << "\td = " << d << "\tn = " << n << std::endl;
 	// std::cout << "address = " << address << std::endl;
+}
+
+ll myCrypto::lab_fifth::Server::addVoterAndComputeS1(const ll &id, const ll &h1) {
+	namespace lw1 = myCrypto::lab_first;
+	
+	if (std::find(voters.begin(), voters.end(), id) != voters.end()) // если нашли id в voters
+		return -1;
+	
+	voters.push_back(id);
+
+	return lw1::powMod(h1, c, n);
+}
+
+bool myCrypto::lab_fifth::Server::recieveBulletinAndAddToDB(const ll &n, const ll &s, const ll &id) const {
+	namespace lw1 = myCrypto::lab_first;
+
+	std::string nStr = std::to_string(n);
+
+	std::vector<unsigned char> bytes_hash_vec(picosha2::k_digest_size);
+	picosha2::hash256(nStr.begin(), nStr.end(), bytes_hash_vec.begin(), bytes_hash_vec.end());
+
+	ap_uint<256> hash = 0;
+	for (const auto &item : bytes_hash_vec) {
+		hash = (hash << 8) | item;
+	}	
+
+	hash = hash % this->n;
+	
+	// std::cout << hash << std::endl;
+	// std::cout << lw1::powMod(s, d, this->n) << std::endl;
+
+	std::ofstream database("database.csv", std::ios::app);
+	if (hash == lw1::powMod(s, d, this->n)) {
+		database << id << ';' << n << ';' << s << '\n';
+		database.close();
+		
+		return true;
+	}
+	database.close();
+
+	return false;
 }
 
 ll myCrypto::lab_fifth::Server::getC() const {
@@ -882,9 +929,18 @@ ll myCrypto::lab_fifth::Server::getAddress() const {
 
 myCrypto::lab_fifth::Server::~Server() {}
 
-myCrypto::lab_fifth::Client::Client() : rnd(myCrypto::lab_first::random(1e7, 1e9)), n(0), r(0), id(++count) {}
+myCrypto::lab_fifth::Client::Client() : rnd(myCrypto::lab_first::random(1e7, 1e9)), n(0), r(0), 
+	id(++count), h(0), h1(0), s1(0), s(0) {}
 
-void myCrypto::lab_fifth::Client::generate_n(const ll &address, const char vote) {
+void myCrypto::lab_fifth::Client::setVote(const char vote) {
+	this->vote = vote;
+}
+
+void myCrypto::lab_fifth::Client::setS1(const ll &s1) {
+	this->s1 = s1;
+}
+
+void myCrypto::lab_fifth::Client::generate_n(const ll &address) {
 	namespace lw1 = myCrypto::lab_first;
 	
 	ll rnd_copy = rnd;
@@ -907,7 +963,49 @@ void myCrypto::lab_fifth::Client::generate_r(const ll &n) {
 	// std::cout << "r = " << r << std::endl;
 }
 
-ll myCrypto::lab_fifth::Client::getN() const {
+void myCrypto::lab_fifth::Client::generate_h() {
+	std::string nStr = std::to_string(n);
+
+	std::vector<unsigned char> bytes_hash_vec(picosha2::k_digest_size);
+	picosha2::hash256(nStr.begin(), nStr.end(), bytes_hash_vec.begin(), bytes_hash_vec.end());
+
+	// for (const auto &item : bytes_hash_vec) {
+	// 	std::cout << "item: " << (int)item << std::endl;
+	// }
+
+	for (const auto &item : bytes_hash_vec) {
+		h = (h << 8) | item;
+	}	
+
+	// std::cout << "h = " << h << std::endl;
+ 
+    // nStr = picosha2::bytes_to_hex_string(bytes_hash_vec);
+	// std::cout << "nStr = " << nStr << std::endl;
+}
+
+void myCrypto::lab_fifth::Client::compute_h1(const ll &d, const ll &n) {
+	namespace lw1 = myCrypto::lab_first;
+	
+	h1 = static_cast<ll>(((h % n) * (lw1::powMod(r, d, n))) % n);
+
+	// std::cout << static_cast<ll>(h % n) << std::endl;
+	// std::cout << lw1::powMod(r, d, n) << std::endl;
+	// std::cout << h1 << std::endl;
+}
+
+void myCrypto::lab_fifth::Client::compute_s(const ll &n) {
+	namespace lw1 = myCrypto::lab_first;
+
+	ll r_inversed = lw1::extendedGCD(r, n)[1];
+	if (r_inversed < 0)
+		r_inversed = r_inversed + n;
+	
+	s = (static_cast<__int128_t>(s1 % n) * static_cast<__int128_t>(r_inversed % n)) % n;
+
+	// std::cout << "s = " << s << "\ts1 = " << s1 << "\tr_inv = " << r_inversed << "\tn = " << n << std::endl;
+}
+
+ll myCrypto::lab_fifth::Client::getN() const {	
 	return n;
 }
 
@@ -917,6 +1015,18 @@ ll myCrypto::lab_fifth::Client::getR() const {
 
 ll myCrypto::lab_fifth::Client::getId() const {
 	return id;
+}
+
+ll myCrypto::lab_fifth::Client::getH1() const {
+	return h1;
+}
+
+ll myCrypto::lab_fifth::Client::getS() const {
+	return s;
+}
+
+char myCrypto::lab_fifth::Client::getVote() const {
+	return vote;
 }
 
 myCrypto::lab_fifth::Client::~Client() {}
