@@ -10,11 +10,18 @@ int main() {
     namespace lw1 = myCrypto::lab_first;
     namespace lw3 = myCrypto::lab_third;
 
-    std::remove("database.csv");
+    int num_of_voters = 0;
+    std::cout << "Enter num of voters (or <= 0 to exit): ";
+    std::cin >> num_of_voters;
+
+    if (num_of_voters <= 0)
+        return 0;
+
+    std::remove("database.csv"); // Удаляем БД, если есть
 
     lw5_Server server;
 
-    std::vector<lw5_Client> votersVec(10);
+    std::vector<lw5_Client> votersVec(num_of_voters);
     for (auto &client : votersVec) {
         client.setVote(lw1::random(0, 2)); // 0 - нет, 1 - да, 2 - воздержался
         client.generate_n(server.getAddress()); 
@@ -38,7 +45,7 @@ int main() {
     }
 
     // попытка поучаствовать еще раз для votersVec[7];
-    votersVec[7].setVote(lw1::random(0, 2)); // 0 - нет, 1 - да, 2 - воздержался
+    /*votersVec[7].setVote(lw1::random(0, 2)); // 0 - нет, 1 - да, 2 - воздержался
     votersVec[7].generate_n(server.getAddress()); 
     votersVec[7].generate_r(server.getN());
     votersVec[7].generate_h(server.getN());
@@ -46,7 +53,7 @@ int main() {
     
     ll s1 = server.addVoterAndComputeS1(votersVec[7].getId(), votersVec[7].getH1());
     if (s1 == -1)
-        std::cout << "id<" << votersVec[7].getId() << "> Already in vote." << std::endl;
+        std::cout << "id<" << votersVec[7].getId() << "> Already in vote." << std::endl;*/
 
     return 0;
 }
