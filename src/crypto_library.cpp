@@ -963,8 +963,8 @@ void myCrypto::lab_fifth::Client::generate_r(const ll &n) {
 	// std::cout << "r = " << r << std::endl;
 }
 
-void myCrypto::lab_fifth::Client::generate_h() {
-	std::string nStr = std::to_string(n);
+void myCrypto::lab_fifth::Client::generate_h(const ll &n) {
+	std::string nStr = std::to_string(this->n);
 
 	std::vector<unsigned char> bytes_hash_vec(picosha2::k_digest_size);
 	picosha2::hash256(nStr.begin(), nStr.end(), bytes_hash_vec.begin(), bytes_hash_vec.end());
@@ -977,6 +977,7 @@ void myCrypto::lab_fifth::Client::generate_h() {
 		h = (h << 8) | item;
 	}	
 
+	h = h % n;
 	// std::cout << "h = " << h << std::endl;
  
     // nStr = picosha2::bytes_to_hex_string(bytes_hash_vec);

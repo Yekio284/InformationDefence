@@ -19,7 +19,7 @@ int main() {
         client.setVote(lw1::random(0, 2)); // 0 - нет, 1 - да, 2 - воздержался
         client.generate_n(server.getAddress()); 
         client.generate_r(server.getN());
-        client.generate_h();
+        client.generate_h(server.getN());
         client.compute_h1(server.getD(), server.getN());
         
         ll s1 = server.addVoterAndComputeS1(client.getId(), client.getH1());
@@ -32,16 +32,16 @@ int main() {
         client.compute_s(server.getN());
         
         if (server.recieveBulletinAndAddToDB(client.getN(), client.getS(), client.getId()))
-            std::cout << "id<" << client.getId() << ">: fine." << std::endl; 
+            std::cout << "id<" << client.getId() << ">: good" << std::endl; 
         else
-            std::cout << "id<" << client.getId() << ">: bad." << std::endl;  
+            std::cout << "id<" << client.getId() << ">: bad" << std::endl;  
     }
 
     // попытка поучаствовать еще раз для votersVec[7];
     votersVec[7].setVote(lw1::random(0, 2)); // 0 - нет, 1 - да, 2 - воздержался
     votersVec[7].generate_n(server.getAddress()); 
     votersVec[7].generate_r(server.getN());
-    votersVec[7].generate_h();
+    votersVec[7].generate_h(server.getN());
     votersVec[7].compute_h1(server.getD(), server.getN());
     
     ll s1 = server.addVoterAndComputeS1(votersVec[7].getId(), votersVec[7].getH1());

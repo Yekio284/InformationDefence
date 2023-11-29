@@ -140,7 +140,7 @@ namespace myCrypto {
 
             void generate_n(const ll &address);
             void generate_r(const ll &n);
-            void generate_h();
+            void generate_h(const ll &n);
             void compute_h1(const ll &d, const ll &n);
             void compute_s(const ll &n);
 
