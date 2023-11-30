@@ -1,3 +1,6 @@
 [submodule "external/PicoSHA2"]
 	path = external/PicoSHA2
 	url = https://github.com/okdshin/PicoSHA2
+[submodule "external/ap"]
+	path = external/ap
+	url = https://github.com/arbitrary-precision/ap
