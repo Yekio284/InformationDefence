@@ -154,7 +154,7 @@ namespace myCrypto {
             ~Client();
         };
     }
-    namespace rgr {
-        
+    namespace RGR {
+
     }
 }
