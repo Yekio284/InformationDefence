@@ -38,7 +38,7 @@ namespace myCrypto {
         std::string encodeVernam(const std::string &inputFileName);
         void decodeVernam(const std::string &encodedFileName, const std::string &key);
     }
-    namespace lab_third {
+    namespace lab_third { // Недостаток лабы в том, что после генерации хэш'а, он обрезается
         std::string computeHashFromFile(std::ifstream &file);
         ll hexToDecimal(const std::string &hex_str); // str -> ll
         ll generateBigPrime();
@@ -154,7 +154,7 @@ namespace myCrypto {
             ~Client();
         };
     }
-    namespace RGR {
+    namespace RGR { // Вариант: 2
 
     }
 }
