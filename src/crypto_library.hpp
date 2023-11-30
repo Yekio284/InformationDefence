@@ -5,6 +5,7 @@
 #include <fstream>
 #include <utility>
 #include <map>
+#include "../external/ap/ap.hpp"
 
 typedef long long ll;
 
@@ -87,15 +88,70 @@ namespace myCrypto {
 
             void encryptAndShuffleDeck(const ll &p, std::vector<ll> &nums) const;
             void setEncryptedCards(const std::pair<ll, ll> encryptedCards);
+            
             ll getLeftEncryptedCard() const;
             ll getRightEncryptedCard() const;
             ll getC() const;
             ll getD() const;
+            
             void decryptAndSetCards(const std::vector<myCrypto::lab_fourth::Player> &players, 
                                     std::map<ll, std::string> &deck, const ll &p, const short i);
             void showCards() const;
 
             ~Player();
+        };
+    }
+    namespace lab_fifth {
+        class Server {
+        private:
+            ll c, d, n; // c - секретный ключ; d, n - открытые
+            ll address;
+            std::vector<ll> voters;
+
+        public:
+            Server();
+
+            ll addVoterAndComputeS1(const ll &id, const ll &h1);
+            
+            bool recieveBulletinAndAddToDB(const ll &n, const ll &s, const ll &id) const;
+
+            ll getC() const;
+            ll getD() const;
+            ll getN() const;
+            ll getAddress() const;
+
+            ~Server();
+        };
+
+        class Client {
+        private:
+            static inline ll count;
+            ll rnd, n, r;
+            ll id;
+            ll h1, s1, s;
+            char vote;
+            ap_uint<256> h;
+            
+        public:
+            Client();
+            
+            void setVote(const char vote);
+            void setS1(const ll &s1);
+
+            void generate_n(const ll &address);
+            void generate_r(const ll &n);
+            void generate_h(const ll &n);
+            void compute_h1(const ll &d, const ll &n);
+            void compute_s(const ll &n);
+
+            ll getN() const;
+            ll getR() const;
+            ll getId() const;
+            ll getH1() const;
+            ll getS() const;
+            char getVote() const;
+
+            ~Client();
         };
     }
 }
