@@ -154,7 +154,22 @@ namespace myCrypto {
             ~Client();
         };
     }
-    namespace RGR { // Вариант: 2
+    namespace RGR { // Вариант 2: "Протокол доказательства с нулевым знанием для задачи «Гамильтонов цикл»"
+        class Graph {
+        private:
+            ll n, m;
+            std::vector<ll> hamilton_cycle;
 
+        public:
+            Graph();
+            explicit Graph(std::ifstream &fileInfo, std::ifstream &cycle);
+
+            void printHamiltonCycle();
+
+            ll getN() const;
+            ll getM() const;
+
+            ~Graph();
+        };
     }
 }

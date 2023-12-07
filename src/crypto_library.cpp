@@ -1031,3 +1031,33 @@ char myCrypto::lab_fifth::Client::getVote() const {
 }
 
 myCrypto::lab_fifth::Client::~Client() {}
+
+myCrypto::RGR::Graph::Graph() : n(0), m(0), hamilton_cycle(0) {}
+
+myCrypto::RGR::Graph::Graph(std::ifstream &fileInfo, std::ifstream &cycle) : myCrypto::RGR::Graph::Graph() {
+	std::string buf_str;
+	while (cycle >> buf_str)
+		hamilton_cycle.push_back(std::stoll(buf_str));
+	
+	hamilton_cycle.shrink_to_fit();
+	cycle.close();
+	
+	fileInfo >> n;
+	fileInfo >> m;
+}
+
+void myCrypto::RGR::Graph::printHamiltonCycle() {
+	for (const ll &item : hamilton_cycle)
+		std::cout << item << ' ';
+	std::cout << std::endl;
+}
+
+ll myCrypto::RGR::Graph::getN() const {
+	return n;
+}
+
+ll myCrypto::RGR::Graph::getM() const {
+	return m;
+}
+
+myCrypto::RGR::Graph::~Graph() {}
