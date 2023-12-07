@@ -1046,7 +1046,7 @@ myCrypto::RGR::Graph::Graph(std::ifstream &fileInfo, std::ifstream &cycle) : myC
 	fileInfo >> m;
 }
 
-void myCrypto::RGR::Graph::printHamiltonCycle() {
+void myCrypto::RGR::Graph::printHamiltonCycle() const {
 	for (const ll &item : hamilton_cycle)
 		std::cout << item << ' ';
 	std::cout << std::endl;
