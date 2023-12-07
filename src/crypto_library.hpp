@@ -158,8 +158,8 @@ namespace myCrypto {
         class Graph {
         private:
             ll n, m;
-            std::vector<ll> hamilton_cycle; // гамильтонов цикл
-            std::vector<std::vector<bool>> adjacency_matrix; // матрица смежности
+            std::vector<ll> hamilton_cycle; // Гамильтонов цикл
+            std::vector<std::vector<bool>> adjacency_matrix; // Матрица смежности
 
         public:
             Graph();
