@@ -1073,9 +1073,8 @@ void myCrypto::RGR::Graph::printHamiltonCycle() const {
 }
 
 void myCrypto::RGR::Graph::printEdges() const {
-	for (const auto &edge : edges) {
+	for (const auto &edge : edges)
 		std::cout << '(' << edge.a << ")<--->(" << edge.b << ')' << std::endl;
-	}
 }
 
 ll myCrypto::RGR::Graph::getN() const {
