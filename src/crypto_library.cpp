@@ -1034,7 +1034,7 @@ myCrypto::lab_fifth::Client::~Client() {}
 
 myCrypto::RGR::Graph::Graph() : n(0), m(0), hamilton_cycle(0) {}
 
-myCrypto::RGR::Graph::Graph(std::ifstream &fileInfo, std::ifstream &cycle) : myCrypto::RGR::Graph::Graph() {
+myCrypto::RGR::Graph::Graph(std::ifstream &graphInfo, std::ifstream &cycle) : myCrypto::RGR::Graph::Graph() {
 	std::string buf_str;
 	while (cycle >> buf_str)
 		hamilton_cycle.push_back(std::stoll(buf_str));
@@ -1042,8 +1042,8 @@ myCrypto::RGR::Graph::Graph(std::ifstream &fileInfo, std::ifstream &cycle) : myC
 	hamilton_cycle.shrink_to_fit();
 	cycle.close();
 	
-	fileInfo >> n;
-	fileInfo >> m;
+	graphInfo >> n;
+	graphInfo >> m;
 }
 
 void myCrypto::RGR::Graph::printHamiltonCycle() const {

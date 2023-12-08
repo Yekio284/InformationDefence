@@ -163,7 +163,7 @@ namespace myCrypto {
 
         public:
             Graph();
-            Graph(std::ifstream &fileInfo, std::ifstream &cycle);
+            Graph(std::ifstream &graphInfo, std::ifstream &cycle);
 
             void printHamiltonCycle() const;
 
