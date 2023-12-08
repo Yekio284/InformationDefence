@@ -1032,24 +1032,50 @@ char myCrypto::lab_fifth::Client::getVote() const {
 
 myCrypto::lab_fifth::Client::~Client() {}
 
-myCrypto::RGR::Graph::Graph() : n(0), m(0), hamilton_cycle(0) {}
+myCrypto::RGR::Edge::Edge() {}
 
-myCrypto::RGR::Graph::Graph(std::ifstream &graphInfo, std::ifstream &cycle) : myCrypto::RGR::Graph::Graph() {
-	std::string buf_str;
-	while (cycle >> buf_str)
-		hamilton_cycle.push_back(std::stoll(buf_str));
+myCrypto::RGR::Edge::Edge(ll a_, ll b_) : a(a_), b(b_) {}
+
+myCrypto::RGR::Graph::Graph() : n(0), m(0), hamilton_cycle(0), edges(0) {}
+
+myCrypto::RGR::Graph::Graph(std::ifstream &graphInfo, std::ifstream &cycle) : Graph() {
+	ll buf_num;
+	while (cycle >> buf_num)
+		hamilton_cycle.push_back(buf_num);
 	
 	hamilton_cycle.shrink_to_fit();
 	cycle.close();
 	
-	graphInfo >> n;
-	graphInfo >> m;
+	graphInfo >> n >> m;
+	
+	ll a, b;
+	while (graphInfo >> a >> b) {
+		if (isNotDublicate(a, b))
+			edges.emplace_back(a, b);
+		else
+			std::cout << "Found dublicate: " << a << ' ' << b << std::endl;
+	}
+
+	edges.shrink_to_fit();
+	graphInfo.close();
+}
+
+bool myCrypto::RGR::Graph::isNotDublicate(const ll &a, const ll &b) const {
+	return std::find_if(edges.begin(), edges.end(), [&a, &b](const Edge &edge){
+		return (edge.a == a && edge.b == b) || (edge.a == b && edge.b == a);
+	}) == edges.end();
 }
 
 void myCrypto::RGR::Graph::printHamiltonCycle() const {
-	for (const ll &item : hamilton_cycle)
+	for (const auto &item : hamilton_cycle)
 		std::cout << item << ' ';
 	std::cout << std::endl;
+}
+
+void myCrypto::RGR::Graph::printEdges() const {
+	for (const auto &edge : edges) {
+		std::cout << '(' << edge.a << ")<--->(" << edge.b << ')' << std::endl;
+	}
 }
 
 ll myCrypto::RGR::Graph::getN() const {

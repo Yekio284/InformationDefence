@@ -155,17 +155,28 @@ namespace myCrypto {
         };
     }
     namespace RGR { // Вариант 2: "Протокол доказательства с нулевым знанием для задачи «Гамильтонов цикл»"
+        struct Edge {
+            ll a, b;
+
+            Edge();
+            Edge(ll a_, ll b_);
+        };
+
         class Graph {
         private:
-            ll n, m;
+            ll n, m; // n - кол-во вершин графа, m - кол-во рёбер
             std::vector<ll> hamilton_cycle; // Гамильтонов цикл
             std::vector<std::vector<bool>> adjacency_matrix; // Матрица смежности
+            std::vector<Edge> edges; // Рёбра графа
 
         public:
             Graph();
             Graph(std::ifstream &graphInfo, std::ifstream &cycle);
 
+            bool isNotDublicate(const ll &a, const ll &b) const;
+
             void printHamiltonCycle() const;
+            void printEdges() const;
 
             ll getN() const;
             ll getM() const;
