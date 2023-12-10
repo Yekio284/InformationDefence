@@ -1036,7 +1036,7 @@ myCrypto::RGR::Edge::Edge() {}
 
 myCrypto::RGR::Edge::Edge(ll a_, ll b_) : a(a_), b(b_) {}
 
-myCrypto::RGR::Graph::Graph() : n(0), m(0), hamilton_cycle(0), edges(0) {}
+myCrypto::RGR::Graph::Graph() : n(0), m(0), hamilton_cycle(0), adjacency_matrix(0), edges(0) {}
 
 myCrypto::RGR::Graph::Graph(std::ifstream &graphInfo, std::ifstream &cycle) : Graph() {
 	ll buf_num;
@@ -1047,11 +1047,16 @@ myCrypto::RGR::Graph::Graph(std::ifstream &graphInfo, std::ifstream &cycle) : Gr
 	cycle.close();
 	
 	graphInfo >> n >> m;
-	
+
+	adjacency_matrix.resize(n, std::vector<bool>(n, 0));
+
 	ll a, b;
 	while (graphInfo >> a >> b) {
-		if (isNotDublicate(a, b))
+		if (isNotDublicate(a, b)) {
 			edges.emplace_back(a, b);
+			adjacency_matrix[a][b] = 1;
+			adjacency_matrix[b][a] = 1;
+		}
 		else
 			std::cout << "Found dublicate: " << a << ' ' << b << std::endl;
 	}
@@ -1072,6 +1077,14 @@ void myCrypto::RGR::Graph::printHamiltonCycle() const {
 	std::cout << std::endl;
 }
 
+void myCrypto::RGR::Graph::printAdjacencyMatrix() const {
+	for (const auto &vec : adjacency_matrix) {
+		for (const auto &item : vec)
+			std::cout << item << ' ';
+		std::cout << std::endl;
+	}
+}
+
 void myCrypto::RGR::Graph::printEdges() const {
 	for (const auto &edge : edges)
 		std::cout << '(' << edge.a << ")<--->(" << edge.b << ')' << std::endl;
@@ -1085,4 +1098,122 @@ ll myCrypto::RGR::Graph::getM() const {
 	return m;
 }
 
+std::vector<std::vector<bool>> myCrypto::RGR::Graph::getAdjacencyMatrix() const {
+	return adjacency_matrix;
+}
+
 myCrypto::RGR::Graph::~Graph() {}
+
+myCrypto::RGR::Alice::Alice() {}
+
+myCrypto::RGR::Alice::Alice(std::ifstream &graphInfo, std::ifstream &cycle) : Graph(graphInfo, cycle), d(0), n(0),
+		permutation(0), adjacency_matrix_H(0), adjacency_matrix_H1(0), adjacency_matrix_F(0) {
+	
+	namespace lw1 = myCrypto::lab_first;
+	namespace lw2 = myCrypto::lab_second;
+
+	std::vector<ll> RSA_Parameters = lw2::generateRSAParameters();
+
+	d = RSA_Parameters[1];
+	n = RSA_Parameters[2];
+
+	ll num_vertex = Graph::getN();
+	permutation.resize(num_vertex);
+	std::generate(permutation.begin(), permutation.end(), [n = 0]() mutable { return n++; });
+
+	static std::random_device rand_device;
+	static std::mt19937 engine(rand_device());
+	std::shuffle(permutation.begin(), permutation.end(), engine);
+
+	adjacency_matrix_H.resize(num_vertex, std::vector<bool>(num_vertex, 0));
+	for (ll i = 0; i < num_vertex; i++) {
+		for (ll j = 0; j < num_vertex; j++) {
+			adjacency_matrix_H[permutation[i]][permutation[j]] = getAdjacencyMatrix()[i][j];
+		}
+	}
+
+	adjacency_matrix_H1.resize(num_vertex, std::vector<ll>(num_vertex, 0));
+	for (ll i = 0; i < num_vertex; i++) {
+		for (ll j = 0; j < num_vertex; j++) {
+			adjacency_matrix_H1[i][j] = lw1::random(1e6, 1e8) * 10 + adjacency_matrix_H[i][j];
+		}
+	}
+
+	adjacency_matrix_F.resize(num_vertex, std::vector<ll>(num_vertex, 0));
+	for (ll i = 0; i < num_vertex; i++) {
+		for (ll j = 0; j < num_vertex; j++) {
+			adjacency_matrix_F[i][j] = lw1::powMod(adjacency_matrix_H1[i][j], d, n);
+		}
+	}
+}
+
+bool myCrypto::RGR::Alice::match(std::vector<std::vector<bool>> A, std::vector<std::vector<bool>> B, std::vector<ll> P, ll N) const {
+    for (ll i = 0; i < N; i++) {
+        for (ll j = 0; j < N; j++) {
+            if (A[i][j] != B[P[i]][P[j]])
+                return false;
+		}
+	}
+
+    return true;
+}
+
+void myCrypto::RGR::Alice::printAdjacencyMatrixH() const {
+	for (const auto &vec : adjacency_matrix_H) {
+		for (const auto &item : vec)
+			std::cout << item << ' ';
+		std::cout << std::endl;
+	}
+}
+
+void myCrypto::RGR::Alice::printAdjacencyMatrixH1() const {
+	for (const auto &vec : adjacency_matrix_H1) {
+		for (const auto &item : vec)
+			std::cout << item << ' ';
+		std::cout << std::endl;
+	}
+}
+
+void myCrypto::RGR::Alice::printAdjacencyMatrixF() const {
+	for (const auto &vec : adjacency_matrix_F) {
+		for (const auto &item : vec)
+			std::cout << item << ' ';
+		std::cout << std::endl;
+	}
+}
+
+void myCrypto::RGR::Alice::printPermutation() const {
+	for (const auto &item : permutation)
+		std::cout << item << ' ';
+	std::cout << std::endl;
+}
+
+ll myCrypto::RGR::Alice::getN() const {
+	return n;
+}
+
+ll myCrypto::RGR::Alice::getD() const {
+	return d;
+}
+
+std::vector<ll> myCrypto::RGR::Alice::getPermutation() const {
+	return permutation;
+}
+
+std::vector<std::vector<bool>> myCrypto::RGR::Alice::getAdjacencyMatrixH() const {
+	return adjacency_matrix_H;
+}
+
+std::vector<std::vector<ll>> myCrypto::RGR::Alice::getAdjacencyMatrixF() const {
+	return adjacency_matrix_F;
+}
+
+myCrypto::RGR::Alice::~Alice() {}
+
+myCrypto::RGR::Bob::Bob() {}
+
+myCrypto::RGR::Bob::Bob(const std::vector<std::vector<ll>> &matrixF) : adjacency_matrix_F(matrixF) {
+	
+}
+
+myCrypto::RGR::Bob::~Bob() {}

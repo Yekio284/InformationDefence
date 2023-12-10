@@ -176,12 +176,55 @@ namespace myCrypto {
             bool isNotDublicate(const ll &a, const ll &b) const;
 
             void printHamiltonCycle() const;
+            void printAdjacencyMatrix() const;
             void printEdges() const;
 
             ll getN() const;
             ll getM() const;
 
+            std::vector<std::vector<bool>> getAdjacencyMatrix() const;
+
             ~Graph();
+        };
+
+        class Alice : public Graph {
+        private:
+            ll d, n; // d, n - открытые ключи
+            std::vector<ll> permutation;
+            std::vector<std::vector<bool>> adjacency_matrix_H;
+            std::vector<std::vector<ll>> adjacency_matrix_H1;
+            std::vector<std::vector<ll>> adjacency_matrix_F;
+
+        public:
+            Alice();
+            Alice(std::ifstream &graphInfo, std::ifstream &cycle);
+
+            bool match(std::vector<std::vector<bool>> A, std::vector<std::vector<bool>> B, std::vector<ll> P, ll N) const; // функция проверки матриц на изоморфность
+
+            void printAdjacencyMatrixH() const;
+            void printAdjacencyMatrixH1() const;
+            void printAdjacencyMatrixF() const;
+            void printPermutation() const;
+
+            ll getN() const;
+            ll getD() const;
+
+            std::vector<ll> getPermutation() const;
+            std::vector<std::vector<bool>> getAdjacencyMatrixH() const;
+            std::vector<std::vector<ll>> getAdjacencyMatrixF() const;
+
+            ~Alice();
+        };
+
+        class Bob {
+        private:
+            std::vector<std::vector<ll>> adjacency_matrix_F;
+
+        public:
+            Bob();
+            explicit Bob(const std::vector<std::vector<ll>> &matrixF);
+            
+            ~Bob();
         };
     }
 }
