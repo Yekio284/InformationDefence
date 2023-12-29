@@ -3,4 +3,3 @@ src/*
 !src/*.cpp
 !src/*.hpp
 !src/Makefile
-!src/hamilton_files
