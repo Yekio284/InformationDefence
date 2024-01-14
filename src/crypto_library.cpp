@@ -19,7 +19,7 @@ inline std::ostream &operator<<(std::ostream &out, __int128_t val) { // https://
     return out << static_cast<uint64_t>(val);
 }
 
-template <typename T> // T = стандартные типы - int, ll, char, float... А также std::string.
+template <typename T> // T = стандартные типы - int, long long, char, float... А также std::string.
 inline std::ostream& operator<<(std::ostream &out, const std::pair<T, T> &pairToCout) {
 	out << pairToCout.first;
 	out << ' ';
